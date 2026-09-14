@@ -153,7 +153,7 @@ projeto-trilha-b-ou-c/
 ## 5. README do repositório do grupo (copiar e preencher)
 
 ```markdown
-# 🌱 Predição da Qualidade do Ar com Pandas 💨
+# 🌱 Predição da Qualidade do Ar com foco nos melhores horários para praticar execicios ao ar-livre em SP 🏃🏻‍➡️
 
 **Disciplina:** Ciência de Dados e Aprendizado de Máquina
 **Trilha:** B 
