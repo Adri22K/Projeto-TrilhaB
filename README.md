@@ -3,7 +3,7 @@ Esse repositorio será sobre o desenvolvimento de um Data Frame para a aula de C
 
 # 🌱 Predição da Qualidade do Ar com Pandas 💨
 
-Este projeto tem como objetivo coletar, tratar e analisar dados de qualidade do ar para auxiliar na previsão das concentrações de poluentes atmosféricos. Os dados são obtidos pelas APIs Open-Meteo Air Quality, Open-Meteo Historical e NASA POWER.
+Este projeto tem como objetivo coletar, tratar e analisar dados de qualidade do ar para auxiliar na previsão das concentrações de poluentes atmosféricos. Os dados são obtidos pelas APIs Open-Meteo Air Quality e Historical.
 O desenvolvimento é realizado no Google Colab utilizando Python e Pandas. Entre as variáveis analisadas estão PM2.5, PM10, dióxido de nitrogênio, dióxido de enxofre e ozônio, além de informações meteorológicas como temperatura, chuva e velocidade do vento.
 Os dados horários são transformados em médias diárias, tratados e organizados para futura utilização em análises e modelos preditivos.
 
