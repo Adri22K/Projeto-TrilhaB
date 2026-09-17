@@ -40,8 +40,9 @@
 | Qual é o custo de um falso negativo e de um falso positivo? | Falso negativo: o sistema considera um horário adequado quando, na realidade, a qualidade do ar está inadequada, podendo aumentar a exposição do praticante ou atleta aos poluentes durante o exercício. Falso positivo: o sistema considera um horário inadequado quando as condições estão adequadas, podendo fazer com que o usuário altere ou evite um treino desnecessariamente. O falso negativo é considerado mais grave para o projeto.|
 | Justificativa da escolha da Trilha B (relevância, disponibilidade de dados, viabilidade) | A Trilha B — Qualidade do ar inadequada foi escolhida pela relevância da qualidade do ar para pessoas que realizam exercícios ao ar livre e pela possibilidade de apoiar a escolha de horários mais favoráveis para essas atividades. O projeto apresenta disponibilidade de dados históricos de qualidade do ar por meio de APIs, além de viabilidade técnica para coleta, integração, análise e posterior desenvolvimento de um modelo preditivo.|
 
-- [✅] RFC da Sprint 1 preenchido a partir deste canvas
-- [✅] Dicionário v0.1 só com fontes e variáveis **brutas**
+<img src="https://img.shields.io/badge/feito-008000?style=flat-square" />  RFC da Sprint 1 preenchido a partir deste canvas 
+<br>
+<img src="https://img.shields.io/badge/feito-008000?style=flat-square" />  Dicionário v0.1 só com fontes e variáveis brutas 
 
 ## 2. Documentação das APIs e parâmetros
 
@@ -57,21 +58,22 @@
 |SO₂ | Open-Meteo Air Quality API| µg/m³ | Complementa a análise da presença de gases poluentes na atmosfera. | Ambos |
 
 
-- [✓] Para cada API (Open-Meteo Air Quality API): endpoint, parâmetros obrigatórios, resolução temporal, período histórico disponível e limitações registrados
+<img src="https://img.shields.io/badge/feito-008000?style=flat-square" /> Para cada API (Open-Meteo Air Quality API): endpoint, parâmetros obrigatórios, resolução temporal, período histórico disponível e limitações registrados
 
-- Endpoint: /v1/air-quality
+• Endpoint: /v1/air-quality
 
-- Parâmetros utilizados: latitude, longitude, start_date, end_date e hourly, com as variáveis de qualidade do ar selecionadas.
+• Parâmetros utilizados: latitude, longitude, start_date, end_date e hourly, com as variáveis de qualidade do ar selecionadas.
 Latitude e longitude identificam a localização; hourly determina quais variáveis serão retornadas.
 
-- Resolução temporal: os dados utilizados são horários. Para São Paulo, a documentação indica que a fonte global CAMS tem resolução nativa de 3 horas; a API apresenta dados horários.
+• Resolução temporal: os dados utilizados são horários. Para São Paulo, a documentação indica que a fonte global CAMS tem resolução nativa de 3 horas; a API apresenta dados horários.
 
-- Período utilizado pelo projeto: 06/09/2024 a 06/09/2026.
+• Período utilizado pelo projeto: 06/09/2024 a 06/09/2026.
 
-- Limitações: por serem provenientes de modelos atmosféricos, os valores representam uma estimativa para uma célula espacial e não uma medição realizada exatamente no ponto onde uma pessoa realizará o exercício. A fonte global CAMS também possui resolução espacial relativamente ampla, de aproximadamente 45 km.
+• Limitações: por serem provenientes de modelos atmosféricos, os valores representam uma estimativa para uma célula espacial e não uma medição realizada exatamente no ponto onde uma pessoa realizará o exercício. A fonte global CAMS também possui resolução espacial relativamente ampla, de aproximadamente 45 km.
 
-- [✅] Dados de poluentes declarados como **medidos ou modelados**
-- [✅] Seleção criteriosa de variáveis (não todas as disponíveis)
+<img src="https://img.shields.io/badge/feito-008000?style=flat-square" /> Dados de poluentes declarados como **medidos ou modelados**
+
+ <img src="https://img.shields.io/badge/feito-008000?style=flat-square" /> Seleção criteriosa de variáveis (não todas as disponíveis)
 
 ## 3. Coleta bruta
 
@@ -93,14 +95,19 @@ Em processo de criação.
 - [❌] Arquivos da API gravados em `data/raw/` (JSON/CSV da resposta) e **não sobrescritos** depois
 Atualmente salva dados_saida/qualidade_do_ar_por_dia.csv. Precisamos salvar os dados brutos em data/raw/, preservando-os.
 
-##LEGENDAS
-❌ - Não atende
-⚠️ - Atende parcial
-✅ - Atende
+```
+ Legendas
+ 
+ ❌ - Não atende
+ ⚠️ - Atende parcial
+ ✅ - Atende
+```
+
 
 **Evidências (prints, trechos de código, link do notebook/commit):**
-
-[![Print GitHub requirements](print git.png)]
+<hr> 
+<img width="739" height="485" alt="print git" src="https://github.com/user-attachments/assets/f0afac57-be23-44fb-84fa-1503062ae7a8" />
+<hr>
 
 ## 4. Integração do bruto (ainda sem limpar)
 
@@ -145,15 +152,15 @@ Development Team = Adrielle, Victor, João e Samir
 
 ## 7. Evidências gerais
 
-- Link do RFC: https://github.com/Adri22K/Projeto-TrilhaB/blob/6007a278c88fa1a6ae0ff768201da7b66456c039/docs/RFC.md
+- Link do RFC: [RFC](https://github.com/Adri22K/Projeto-TrilhaB/blob/6007a278c88fa1a6ae0ff768201da7b66456c039/docs/RFC.md)
 
 - Link do dicionário v0.1:
 
-- Link de commits desta Sprint: https://github.com/Adri22K/Projeto-TrilhaB/commits/main/
+- Link de commits desta Sprint: [SPRINT #1](https://github.com/Adri22K/Projeto-TrilhaB/commits/main/)
 
-- Link do board atualizado: https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970
+- Link do board atualizado: [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-54815479701)
 
-- Link do notebook / `config` / `data/raw`: https://github.com/Adri22K/Projeto-TrilhaB/tree/6007a278c88fa1a6ae0ff768201da7b66456c039/config
+- Link do notebook / `config` / `data/raw`: [NOTBOOK](https://github.com/Adri22K/Projeto-TrilhaB/tree/6007a278c88fa1a6ae0ff768201da7b66456c039/config)
 
 ---
 
