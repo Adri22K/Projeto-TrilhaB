@@ -170,8 +170,6 @@ projeto-trilha-b-ou-c/
 
 ## Problema
 
-Evento, usuário da decisão e horizonte (3 frases).
-
 O projeto busca prever a ocorrência de horários com **qualidade do ar inadequada para a prática de exercícios ao ar livre em São Paulo**. A previsão é destinada a praticantes de atividades físicas ao ar livre, incluindo praticantes amadores e atletas, apoiando a escolha de horários mais favoráveis para a realização das atividades. O horizonte definido para a previsão é de **até 24 horas à frente**.
 
 **Classe positiva:** Horário com qualidade do ar inadequada para a prática de exercícios ao ar livre. A definição formal e o limiar da classe serão estabelecidos na Sprint 2 com base nos dados de treino.
@@ -195,7 +193,7 @@ Notebooks: 01 → 05.
 | Open-Meteo Historical Weather API | Variáveis meteorológicas utilizadas para complementar a análise e futura construção das features | Horária | Modelado / reanálise | 06/09/2024 a 06/09/2026 |
 
 Unidade de análise:
-N após o merge: ~preencher após a integração das duas fontes na Sprint 1.~
+N após o merge: ~ preencher após a integração das duas fontes na Sprint 1.~
 Split: A definir na Sprint 2.
 Dicionário: `docs/Dicionario_de_Dados.md`
 
@@ -241,7 +239,7 @@ Métrica principal na classe positiva (teste, uma vez): A definir conforme o pro
 
 | Arquivo | Público |
 |---|---|
-| `RFC_Proposta_de_Projeto_Template.md` | Grupo |
-| `Dicionario_de_Dados_Template.md` | Grupo |
+| `RFC_Proposta_de_Projeto_Template.md` | Equipe 2 |
+| `Dicionario_de_Dados_Template.md` | Equipe 2 |
 | `Sprint{1–5}_TrilhaB.md` | Grupo na Trilha B |
 | `Sprint{1–5}_TrilhaC.md` | Grupo na Trilha C |
