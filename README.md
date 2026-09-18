@@ -28,7 +28,7 @@ Não há Sprint 6 neste projeto. Dashboard, se existir na mostra, é extra.
 ## 2. Ordem das sprints (única sequência válida)
 
 ```text
-Sprint 1  17/08–17/09   RFC, coleta bruta, merge, `data/raw`
+✅ Sprint 1  17/08–17/09   RFC, coleta bruta, merge, `data/raw`
 Sprint 2  18/09–27/09   Limpeza e tratamento → split → EDA → alvo → features
 Sprint 3  28/09–04/10   Ingestão robusta + Dummy + persistência + Naive Bayes
 Sprint 4  05/10–11/10   Features novas a partir dos erros; retreino; pipeline congelado
@@ -150,14 +150,14 @@ projeto-trilha-b-ou-c/
 
 ---
 
-## 5. README do repositório do grupo (copiar e preencher)
+## 5. README do repositório do grupo 
 
 ```markdown
 # 🌱 Predição da Qualidade do Ar com foco nos melhores horários para praticar execicios ao ar-livre em SP 🏃🏻‍➡️
 
 **Disciplina:** Ciência de Dados e Aprendizado de Máquina
-**Trilha:** B 
-** Equipe:**
+**Trilha: B **
+** Equipe: Equipe 2**
 - Adrielle Stollemberger RGM: 33948844
 - Victor Almeida de Aquino RGM: 32901321
 - Nicolas Santos Silva RGM: 3287380
@@ -165,13 +165,18 @@ projeto-trilha-b-ou-c/
 - João Pedro Garcia Almeida RGM: 32847629
 
 **Repositório / board:**
+- Link do repositório: https://github.com/Adri22K/Projeto-TrilhaB/tree/main
+- Link do board: https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970
 
 ## Problema
 
 Evento, usuário da decisão e horizonte (3 frases).
 
-Classe positiva:
-Custo priorizado (FN ou FP):
+O projeto busca prever a ocorrência de horários com **qualidade do ar inadequada para a prática de exercícios ao ar livre em São Paulo**. A previsão é destinada a praticantes de atividades físicas ao ar livre, incluindo praticantes amadores e atletas, apoiando a escolha de horários mais favoráveis para a realização das atividades. O horizonte definido para a previsão é de **até 24 horas à frente**.
+
+**Classe positiva:** Horário com qualidade do ar inadequada para a prática de exercícios ao ar livre. A definição formal e o limiar da classe serão estabelecidos na Sprint 2 com base nos dados de treino.
+
+**Custo priorizado (FN ou FP):** **Falso Negativo (FN)**, pois considerar um horário como adequado quando a qualidade do ar estiver inadequada pode levar o usuário a realizar exercícios durante um período com condições desfavoráveis de qualidade do ar.
 
 ## Como reproduzir
 
@@ -179,26 +184,27 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 
-Configuração: `config/params.yaml` (nada de município/datas no código).
+Configuração: `config/params.yaml`
 Notebooks: 01 → 05.
 
 ## Dados
 
 | Fonte | Papel | Resolução | Medido ou modelado | Período |
 |---|---|---|---|---|
-| | | | | |
+| Open-Meteo Air Quality API | Dados de qualidade do ar utilizados para caracterização dos poluentes e posterior construção da variável-alvo | Horária (CAMS Global possui resolução nativa de 3 horas, com dados horários disponibilizados pela API) | Modelado | 06/09/2024 a 06/09/2026 |
+| Open-Meteo Historical Weather API | Variáveis meteorológicas utilizadas para complementar a análise e futura construção das features | Horária | Modelado / reanálise | 06/09/2024 a 06/09/2026 |
 
 Unidade de análise:
-N após o merge:
-Split:
+N após o merge: ~preencher após a integração das duas fontes na Sprint 1.~
+Split: A definir na Sprint 2.
 Dicionário: `docs/Dicionario_de_Dados.md`
 
 ## Modelo
 
-Baseline:
-Modelo final:
-Limiar (escolhido na validação) e por quê:
-Métrica principal na classe positiva (teste, uma vez):
+Baseline: A definir nas próximas Sprints.
+Modelo final: A definir na Sprint 5 após treinamento e comparação dos modelos.
+Limiar (escolhido na validação) e por quê: A definir utilizando os dados de validação, considerando principalmente o custo associado aos falsos negativos.
+Métrica principal na classe positiva (teste, uma vez): A definir conforme o protocolo de avaliação do projeto. A avaliação final no conjunto de teste será realizada apenas uma vez.
 
 ## Documentação
 
@@ -211,7 +217,7 @@ Métrica principal na classe positiva (teste, uma vez):
 
 ## 6. Checklist antes de chamar o modelo de pronto
 
-- [ ] RFC e dicionário batem com o notebook (mesmo alvo, mesmo horizonte).
+<img src="https://img.shields.io/badge/feito-008000?style=flat-square" /> RFC e dicionário batem com o notebook (mesmo alvo, mesmo horizonte).
 - [ ] Duas fontes integradas com `how`/`validate` conscientes.
 - [ ] Inspeção de qualidade **antes** da correção (Sprint 2); limpeza com log e `data/interim`; `data/raw` da Sprint 1 intocado.
 - [ ] EDA feita na tabela tratada, não no bruto.
