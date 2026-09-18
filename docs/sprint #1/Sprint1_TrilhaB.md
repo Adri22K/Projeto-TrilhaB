@@ -160,7 +160,7 @@ Development Team = Adrielle, Victor, João e Samir
 
 - Link do RFC: [RFC](https://github.com/Adri22K/Projeto-TrilhaB/blob/6007a278c88fa1a6ae0ff768201da7b66456c039/docs/RFC.md)
 
-- Link do dicionário v0.1:
+- Link do dicionário v0.1: [DICIONÁRIO](https://github.com/Adri22K/Projeto-TrilhaB/blob/ea44440836466dac02f715057d3aa5169bc5ee03/docs/sprint%20%231/Dicionario_de_Dados_Template.md)
 
 - Link de commits desta Sprint: [SPRINT #1](https://github.com/Adri22K/Projeto-TrilhaB/commits/main/)
 
