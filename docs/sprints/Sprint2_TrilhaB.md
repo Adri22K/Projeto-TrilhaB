@@ -134,21 +134,15 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 
 **Link do board:** [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)
 
-O link informado aponta para uma issue aberta da Sprint 1 e não apresenta histórico da Sprint 2; por isso, os dois itens acima permanecem desmarcados.
-
 ## 8. Diário de bordo (retrospectiva individual)
 
 | Integrante | O que fiz nesta Sprint | Dificuldades | O que pretendo manter/ajustar |
 |---|---|---|---|
-Adrielle | Auxiliei na análise e organização dos dados utilizados na Sprint 2 | Compreender o tratamento necessário antes da análise exploratória | Manter a organização e documentação das etapas do projeto
-
-Victor | Auxiliei no processo de limpeza e análise exploratória dos dados | Identificar corretamente valores inválidos e possíveis outliers |Melhorar a análise dos dados nas próximas etapas
-
-Nicolas | Auxiliei na organização das atividades da Sprint e acompanhamento do board | Garantir que as etapas fossem realizadas na ordem definida | Manter o acompanhamento das tarefas e a organização do grupo
-
-Samir | Auxiliei na análise das variáveis de qualidade do ar | Interpretar as relações entre os diferentes poluentes | Aprofundar a análise das variáveis utilizadas no projeto
-
-João Pedro | Auxiliei na definição da variável-alvo e na engenharia inicial de atributos | Evitar vazamento de dados durante a criação de variáveis temporais | Manter o cuidado com dados temporais e aprimorar as features utilizadas pelo projetoos para caracterizar a qualidade do ar.
+Adrielle | Auxiliei na análise e organização dos dados utilizados na Sprint 2 | Compreender o tratamento necessário antes da análise exploratória | Manter a organização e documentação das etapas do projeto |
+Victor | Auxiliei no processo de limpeza e análise exploratória dos dados | Identificar corretamente valores inválidos e possíveis outliers |Melhorar a análise dos dados nas próximas etapas |
+Nicolas | Auxiliei na organização das atividades da Sprint e acompanhamento do board | Garantir que as etapas fossem realizadas na ordem definida | Manter o acompanhamento das tarefas e a organização do grupo |
+Samir | Auxiliei na análise das variáveis de qualidade do ar | Interpretar as relações entre os diferentes poluentes | Aprofundar a análise das variáveis utilizadas no projeto |
+João Pedro | Auxiliei na definição da variável-alvo e na engenharia inicial de atributos | Evitar vazamento de dados durante a criação de variáveis temporais | Manter o cuidado com dados temporais e aprimorar as features utilizadas pelo projetoos para caracterizar a qualidade do ar. |
 
 ## Rubrica de avaliação — Sprint 2 (nota de 0 a 4,0)
 
