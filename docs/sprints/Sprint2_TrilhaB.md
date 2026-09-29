@@ -132,8 +132,6 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 
 **Link do board:** [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)
 
-O link informado aponta para uma issue aberta da Sprint 1 e não apresenta histórico da Sprint 2; por isso, os dois itens acima permanecem desmarcados.
-
 ## 8. Diário de bordo (retrospectiva individual)
 
 | Integrante | O que fiz nesta Sprint | Dificuldades | O que pretendo manter/ajustar |
