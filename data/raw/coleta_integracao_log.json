@@ -1,0 +1,106 @@
+{
+  "collected_at_utc": "2026-09-28T23:26:35.310580+00:00",
+  "config_file": "config/params.yaml",
+  "inspection": {
+    "air_quality": {
+      "status_code": 200,
+      "content_type": "application/json; charset=utf-8",
+      "top_level_keys": [
+        "elevation",
+        "generationtime_ms",
+        "hourly",
+        "hourly_units",
+        "latitude",
+        "longitude",
+        "timezone",
+        "timezone_abbreviation",
+        "utc_offset_seconds"
+      ],
+      "hourly_keys": [
+        "carbon_monoxide",
+        "nitrogen_dioxide",
+        "ozone",
+        "pm10",
+        "pm2_5",
+        "sulphur_dioxide",
+        "time"
+      ],
+      "hourly_units": {
+        "time": "iso8601",
+        "pm10": "μg/m³",
+        "pm2_5": "μg/m³",
+        "carbon_monoxide": "μg/m³",
+        "nitrogen_dioxide": "μg/m³",
+        "sulphur_dioxide": "μg/m³",
+        "ozone": "μg/m³"
+      },
+      "row_count": 17544,
+      "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=-23.5489&longitude=-46.6388&start_date=2024-09-06&end_date=2026-09-06&timezone=America%2FSao_Paulo&hourly=pm10%2Cpm2_5%2Ccarbon_monoxide%2Cnitrogen_dioxide%2Csulphur_dioxide%2Cozone"
+    },
+    "weather": {
+      "status_code": 200,
+      "content_type": "application/json; charset=utf-8",
+      "top_level_keys": [
+        "elevation",
+        "generationtime_ms",
+        "hourly",
+        "hourly_units",
+        "latitude",
+        "longitude",
+        "timezone",
+        "timezone_abbreviation",
+        "utc_offset_seconds"
+      ],
+      "hourly_keys": [
+        "precipitation",
+        "temperature_2m",
+        "time",
+        "wind_speed_10m"
+      ],
+      "hourly_units": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "precipitation": "mm",
+        "wind_speed_10m": "km/h"
+      },
+      "row_count": 17544,
+      "request_url": "https://archive-api.open-meteo.com/v1/archive?latitude=-23.5489&longitude=-46.6388&start_date=2024-09-06&end_date=2026-09-06&timezone=America%2FSao_Paulo&hourly=temperature_2m%2Cprecipitation%2Cwind_speed_10m"
+    }
+  },
+  "integration": {
+    "join_key": "timestamp",
+    "how": "inner",
+    "validate": "one_to_one",
+    "air_rows": 17544,
+    "weather_rows": 17544,
+    "air_duplicate_timestamps": 0,
+    "weather_duplicate_timestamps": 0,
+    "air_unmatched_rows": 0,
+    "weather_unmatched_rows": 0,
+    "merged_rows": 17544,
+    "merged_columns": [
+      "timestamp",
+      "pm10",
+      "pm2_5",
+      "carbon_monoxide",
+      "nitrogen_dioxide",
+      "sulphur_dioxide",
+      "ozone",
+      "temperature_2m",
+      "precipitation",
+      "wind_speed_10m"
+    ],
+    "missing_by_column": {
+      "timestamp": 0,
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "temperature_2m": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    }
+  }
+}
