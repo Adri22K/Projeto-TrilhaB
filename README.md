@@ -133,7 +133,10 @@ projeto-trilha-b-ou-c/
 │   └── processed/
 ├── notebooks/
 │   ├── 01_ingestao.ipynb
-│   ├── 02_limpeza_eda_features.ipynb
+│   ├── 02_1_limpeza_tratamento.ipynb
+│   ├── 02_2_split_temporal.ipynb
+│   ├── 02_3_eda_treino.ipynb
+│   ├── 02_4_alvo_features.ipynb
 │   ├── 03_baseline.ipynb
 │   ├── 04_features_iteracao.ipynb
 │   └── 05_modelos.ipynb

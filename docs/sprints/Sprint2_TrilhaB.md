@@ -63,7 +63,7 @@ Não imputar com média/mediana/moda do dataset **inteiro**. Isso vaza o teste. 
 | Valores negativos em poluentes, precipitação ou vento | Converter para `NaN` | 0 | 17.544 |
 
 **N após a limpeza:** 17.544 linhas.  
-**Evidências (link do notebook/commit):** [`notebooks/02_limpeza_eda_features.ipynb`](../../notebooks/02_limpeza_eda_features.ipynb), [`src/prepara_sprint2.py`](../../src/prepara_sprint2.py), [`data/interim/integrado_limpo.csv`](../../data/interim/integrado_limpo.csv) e [`reports/sprint2/relatorio_execucao.json`](../../reports/sprint2/relatorio_execucao.json).
+**Evidências (link do notebook/commit):** [`notebooks/02_1_limpeza_tratamento.ipynb`](../../notebooks/02_1_limpeza_tratamento.ipynb), [`src/prepara_sprint2.py`](../../src/prepara_sprint2.py), [`data/interim/integrado_limpo.csv`](../../data/interim/integrado_limpo.csv) e [`reports/sprint2/relatorio_execucao.json`](../../reports/sprint2/relatorio_execucao.json).
 
 ## 2. Split temporal
 
@@ -76,6 +76,8 @@ Sobre a tabela **já limpa** (`data/interim/`).
 **Corte:** 14/04/2026 às 00:00.  
 **N treino / N teste:** 14.040 / 3.504.  
 **Justificativa:** Divisão temporal de aproximadamente 80% para treino e 20% para teste, arredondada para o início do dia. O treino cobre 06/09/2024 00:00 a 13/04/2026 23:00; o teste cobre 14/04/2026 00:00 a 06/09/2026 23:00. Não houve embaralhamento.
+
+**Evidência:** [`notebooks/02_2_split_temporal.ipynb`](../../notebooks/02_2_split_temporal.ipynb).
 
 ## 3. Tratamento estatístico residual (depois do split, antes da EDA)
 
@@ -97,7 +99,7 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 
 **Principais achados da EDA (treino):** PM10 e PM2,5 apresentaram a maior correlação entre poluentes (`r = 0,9658`). O ozônio apresentou correlação positiva com temperatura (`r = 0,6960`) e negativa com NO₂ (`r = -0,5581`). As medianas no treino foram 17,7 µg/m³ para PM10, 16,5 µg/m³ para PM2,5 e 64,0 µg/m³ para O₃. Pelo critério do intervalo interquartil foram sinalizados, entre outros, 687 valores de PM10, 641 de PM2,5 e 135 de O₃. Eles foram mantidos porque não violam o domínio e podem representar episódios reais. Na precipitação, como Q1, mediana e Q3 são zero, o critério IQR marca qualquer chuva positiva; esses valores também foram mantidos.
 
-**Evidências (gráficos, link do notebook):** [`notebooks/02_limpeza_eda_features.ipynb`](../../notebooks/02_limpeza_eda_features.ipynb), [série temporal](../../reports/sprint2/serie_temporal_treino.png), [histogramas](../../reports/sprint2/histogramas_treino.png), [boxplots](../../reports/sprint2/boxplots_treino.png), [correlação](../../reports/sprint2/correlacao_treino.png) e [`estatisticas_treino.csv`](../../reports/sprint2/estatisticas_treino.csv).
+**Evidências (gráficos, link do notebook):** [`notebooks/02_3_eda_treino.ipynb`](../../notebooks/02_3_eda_treino.ipynb), [série temporal](../../reports/sprint2/serie_temporal_treino.png), [histogramas](../../reports/sprint2/histogramas_treino.png), [boxplots](../../reports/sprint2/boxplots_treino.png), [correlação](../../reports/sprint2/correlacao_treino.png) e [`estatisticas_treino.csv`](../../reports/sprint2/estatisticas_treino.csv).
 
 ## 5. Definição da variável-alvo
 
@@ -123,7 +125,7 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 
 **Descrição e justificativa dos atributos:** Foram mantidas as nove variáveis brutas disponíveis no instante da previsão. Para cada uma foram criados `lag_1h` (persistência recente), `lag_24h` (mesma hora do dia anterior) e `media_24h` (histórico recente). A média móvel usa `.shift(1).rolling(24)`, excluindo o instante atual e o futuro. Também foram criadas `hora`, `dia_semana` e `mes` para representar ciclos diários, semanais e sazonais. O timestamp permanece apenas como chave, não como número. As seis flags auxiliares usadas para construir o alvo não são incluídas nas features. As primeiras 24 linhas do treino, sem histórico completo para os lags, foram excluídas do arquivo de features em vez de imputadas; assim, `treino_features.csv` possui 14.016 linhas e `teste_features.csv` possui 3.480 linhas completas.
 
-**Evidências (trecho de código, link do notebook):** [`notebooks/02_limpeza_eda_features.ipynb`](../../notebooks/02_limpeza_eda_features.ipynb), [`src/prepara_sprint2.py`](../../src/prepara_sprint2.py), [`docs/Dicionario_de_Dados.md`](../Dicionario_de_Dados.md), [`data/processed/treino_features.csv`](../../data/processed/treino_features.csv) e [`data/processed/teste_features.csv`](../../data/processed/teste_features.csv).
+**Evidências (trecho de código, link do notebook):** [`notebooks/02_4_alvo_features.ipynb`](../../notebooks/02_4_alvo_features.ipynb), [`src/prepara_sprint2.py`](../../src/prepara_sprint2.py), [`docs/Dicionario_de_Dados.md`](../Dicionario_de_Dados.md), [`data/processed/treino_features.csv`](../../data/processed/treino_features.csv) e [`data/processed/teste_features.csv`](../../data/processed/teste_features.csv).
 
 ## 7. Scrum
 
