@@ -1,1 +1,55 @@
+location:
+  name: São Paulo - SP
+  latitude: -23.5489
+  longitude: -46.6388
+  timezone: America/Sao_Paulo
 
+period:
+  start_date: '2024-09-06'
+  end_date: '2026-09-06'
+
+apis:
+  air_quality:
+    url: https://air-quality-api.open-meteo.com/v1/air-quality
+    hourly:
+      - pm10
+      - pm2_5
+      - carbon_monoxide
+      - nitrogen_dioxide
+      - sulphur_dioxide
+      - ozone
+  weather:
+    url: https://archive-api.open-meteo.com/v1/archive
+    hourly:
+      - temperature_2m
+      - precipitation
+      - wind_speed_10m
+
+http:
+  timeout_seconds: 60
+  retries: 5
+  backoff_factor: 0.5
+
+merge:
+  how: inner
+  validate: one_to_one
+
+sprint2:
+  test_fraction: 0.2
+  forecast_horizon_hours: 24
+  sentinels:
+    - -999
+    - -9999
+    - 9999
+  target:
+    name: qualidade_inadequada_24h
+    classification: CETESB N3 - RUIM ou pior
+    reference_url: https://sistemasinter.cetesb.sp.gov.br/Ar/php/boletim_por_poluente.php
+    thresholds:
+      pm10_24h_ug_m3: 100
+      pm2_5_24h_ug_m3: 50
+      sulphur_dioxide_24h_ug_m3: 50
+      ozone_8h_ug_m3: 130
+      nitrogen_dioxide_1h_ug_m3: 240
+      carbon_monoxide_8h_ppm: 11
+    co_ug_m3_to_ppm_factor: 0.0008727

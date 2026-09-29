@@ -29,7 +29,7 @@ Não há Sprint 6 neste projeto. Dashboard, se existir na mostra, é extra.
 
 ```text
 ✅ Sprint 1  17/08–17/09   RFC, coleta bruta, merge, `data/raw`
-Sprint 2  18/09–27/09   Limpeza e tratamento → split → EDA → alvo → features
+✅ Sprint 2  18/09–27/09   Limpeza e tratamento → split → EDA → alvo → features
 Sprint 3  28/09–04/10   Ingestão robusta + Dummy + persistência + Naive Bayes
 Sprint 4  05/10–11/10   Features novas a partir dos erros; retreino; pipeline congelado
 Sprint 5  12/10–25/10   Todos os modelos no pipeline final; limiar; model card
@@ -172,7 +172,7 @@ projeto-trilha-b-ou-c/
 
 O projeto busca prever a ocorrência de horários com **qualidade do ar inadequada para a prática de exercícios ao ar livre em São Paulo**. A previsão é destinada a praticantes de atividades físicas ao ar livre, incluindo praticantes amadores e atletas, apoiando a escolha de horários mais favoráveis para a realização das atividades. O horizonte definido para a previsão é de **até 24 horas à frente**.
 
-**Classe positiva:** Horário com qualidade do ar inadequada para a prática de exercícios ao ar livre. A definição formal e o limiar da classe serão estabelecidos na Sprint 2 com base nos dados de treino.
+**Classe positiva:** `qualidade_inadequada_24h = 1` quando, 24 horas após o instante da previsão, pelo menos um poluente atinge a classificação CETESB N3 — RUIM ou pior.
 
 **Custo priorizado (FN ou FP):** **Falso Negativo (FN)**, pois considerar um horário como adequado quando a qualidade do ar estiver inadequada pode levar o usuário a realizar exercícios durante um período com condições desfavoráveis de qualidade do ar.
 
@@ -181,6 +181,8 @@ O projeto busca prever a ocorrência de horários com **qualidade do ar inadequa
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+python src/coleta_integracao.py
+python src/prepara_sprint2.py
 
 Configuração: `config/params.yaml`
 Notebooks: 01 → 05.
@@ -192,9 +194,9 @@ Notebooks: 01 → 05.
 | Open-Meteo Air Quality API | Dados de qualidade do ar utilizados para caracterização dos poluentes e posterior construção da variável-alvo | Horária (CAMS Global possui resolução nativa de 3 horas, com dados horários disponibilizados pela API) | Modelado | 06/09/2024 a 06/09/2026 |
 | Open-Meteo Historical Weather API | Variáveis meteorológicas utilizadas para complementar a análise e futura construção das features | Horária | Modelado / reanálise | 06/09/2024 a 06/09/2026 |
 
-Unidade de análise:
-N após o merge: ~ preencher após a integração das duas fontes na Sprint 1.~
-Split: A definir na Sprint 2.
+Unidade de análise: uma hora em São Paulo, com qualidade do ar e clima integrados pelo timestamp.
+N após o merge: 17.544 linhas e 10 colunas.
+Split: treino de 06/09/2024 00:00 a 13/04/2026 23:00 (14.040 linhas) e teste de 14/04/2026 00:00 a 06/09/2026 23:00 (3.504 linhas).
 Dicionário: `docs/Dicionario_de_Dados.md`
 
 ## Modelo

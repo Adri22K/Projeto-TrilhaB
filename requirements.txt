@@ -1,1 +1,5 @@
-
+pandas
+requests
+matplotlib
+PyYAML
+ipykernel

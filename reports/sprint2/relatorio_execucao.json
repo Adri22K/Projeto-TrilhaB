@@ -1,0 +1,286 @@
+{
+  "inspection_before_cleaning": {
+    "rows": 17544,
+    "columns": [
+      "timestamp",
+      "pm10",
+      "pm2_5",
+      "carbon_monoxide",
+      "nitrogen_dioxide",
+      "sulphur_dioxide",
+      "ozone",
+      "temperature_2m",
+      "precipitation",
+      "wind_speed_10m"
+    ],
+    "missing_by_column": {
+      "timestamp": 0,
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "temperature_2m": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    },
+    "invalid_timestamps": 0,
+    "duplicate_rows": 0,
+    "duplicate_timestamps": 0,
+    "sentinels_by_column": {
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "temperature_2m": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    },
+    "negative_invalid_by_column": {
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    },
+    "numeric_describe": {
+      "pm10": {
+        "count": 17544.0,
+        "mean": 22.1894,
+        "std": 16.1174,
+        "min": 1.1,
+        "25%": 11.6,
+        "50%": 17.4,
+        "75%": 27.9,
+        "max": 175.1
+      },
+      "pm2_5": {
+        "count": 17544.0,
+        "mean": 20.642,
+        "std": 14.4531,
+        "min": 1.0,
+        "25%": 10.6,
+        "50%": 16.3,
+        "75%": 26.4,
+        "max": 129.5
+      },
+      "carbon_monoxide": {
+        "count": 17544.0,
+        "mean": 367.5732,
+        "std": 225.1519,
+        "min": 62.0,
+        "25%": 231.0,
+        "50%": 307.0,
+        "75%": 429.0,
+        "max": 2799.0
+      },
+      "nitrogen_dioxide": {
+        "count": 17544.0,
+        "mean": 26.9275,
+        "std": 20.8765,
+        "min": 0.0,
+        "25%": 12.1,
+        "50%": 21.6,
+        "75%": 35.8,
+        "max": 172.2
+      },
+      "sulphur_dioxide": {
+        "count": 17544.0,
+        "mean": 10.3853,
+        "std": 5.3399,
+        "min": 1.6,
+        "25%": 6.4,
+        "50%": 9.2,
+        "75%": 13.1,
+        "max": 41.3
+      },
+      "ozone": {
+        "count": 17544.0,
+        "mean": 74.0157,
+        "std": 51.5019,
+        "min": 0.0,
+        "25%": 35.0,
+        "50%": 60.0,
+        "75%": 106.0,
+        "max": 343.0
+      },
+      "temperature_2m": {
+        "count": 17544.0,
+        "mean": 20.3899,
+        "std": 4.6699,
+        "min": 6.0,
+        "25%": 17.1,
+        "50%": 20.2,
+        "75%": 23.3,
+        "max": 36.2
+      },
+      "precipitation": {
+        "count": 17544.0,
+        "mean": 0.1665,
+        "std": 0.7222,
+        "min": 0.0,
+        "25%": 0.0,
+        "50%": 0.0,
+        "75%": 0.0,
+        "max": 14.4
+      },
+      "wind_speed_10m": {
+        "count": 17544.0,
+        "mean": 8.0216,
+        "std": 4.5762,
+        "min": 0.0,
+        "25%": 4.8,
+        "50%": 7.2,
+        "75%": 10.4,
+        "max": 42.6
+      }
+    }
+  },
+  "cleaning": {
+    "rows_before": 17544,
+    "invalid_timestamp_rows_removed": 0,
+    "values_coerced_to_nan_by_column": {
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "temperature_2m": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    },
+    "sentinel_cells_changed_to_nan": 0,
+    "negative_cells_changed_to_nan_by_column": {
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    },
+    "duplicate_rows_removed": 0,
+    "duplicate_timestamps_removed": 0,
+    "rows_after": 17544,
+    "missing_after_by_column": {
+      "timestamp": 0,
+      "pm10": 0,
+      "pm2_5": 0,
+      "carbon_monoxide": 0,
+      "nitrogen_dioxide": 0,
+      "sulphur_dioxide": 0,
+      "ozone": 0,
+      "temperature_2m": 0,
+      "precipitation": 0,
+      "wind_speed_10m": 0
+    }
+  },
+  "split": {
+    "cutoff": "2026-04-14T00:00:00",
+    "train_rows": 14040,
+    "test_rows": 3504,
+    "train_start": "2024-09-06T00:00:00",
+    "train_end": "2026-04-13T23:00:00",
+    "test_start": "2026-04-14T00:00:00",
+    "test_end": "2026-09-06T23:00:00"
+  },
+  "residual_missing": {
+    "timestamp": 0,
+    "pm10": 0,
+    "pm2_5": 0,
+    "carbon_monoxide": 0,
+    "nitrogen_dioxide": 0,
+    "sulphur_dioxide": 0,
+    "ozone": 0,
+    "temperature_2m": 0,
+    "precipitation": 0,
+    "wind_speed_10m": 0
+  },
+  "eda_train": {
+    "outliers_iqr_by_column": {
+      "pm10": 687,
+      "pm2_5": 641,
+      "carbon_monoxide": 804,
+      "nitrogen_dioxide": 521,
+      "sulphur_dioxide": 401,
+      "ozone": 135,
+      "temperature_2m": 175,
+      "precipitation": 3284,
+      "wind_speed_10m": 428
+    },
+    "strongest_pollutant_correlation_pair": [
+      "pm10",
+      "pm2_5"
+    ],
+    "strongest_pollutant_correlation": 0.9658
+  },
+  "target": {
+    "name": "qualidade_inadequada_24h",
+    "horizon_hours": 24,
+    "definition": {
+      "name": "qualidade_inadequada_24h",
+      "classification": "CETESB N3 - RUIM ou pior",
+      "reference_url": "https://sistemasinter.cetesb.sp.gov.br/Ar/php/boletim_por_poluente.php",
+      "thresholds": {
+        "pm10_24h_ug_m3": 100,
+        "pm2_5_24h_ug_m3": 50,
+        "sulphur_dioxide_24h_ug_m3": 50,
+        "ozone_8h_ug_m3": 130,
+        "nitrogen_dioxide_1h_ug_m3": 240,
+        "carbon_monoxide_8h_ppm": 11
+      },
+      "co_ug_m3_to_ppm_factor": 0.0008727
+    },
+    "train_valid_rows": 14040,
+    "train_negative": 12080,
+    "train_positive": 1960,
+    "train_positive_percent": 13.9601,
+    "test_valid_rows": 3480,
+    "test_negative": 3181,
+    "test_positive": 299,
+    "test_positive_percent": 8.592,
+    "rows_without_future_label": 24,
+    "train_trigger_counts": {
+      "pm10_ruim": 61,
+      "pm2_5_ruim": 138,
+      "so2_ruim": 0,
+      "ozone_ruim": 1876,
+      "no2_ruim": 0,
+      "co_ruim": 0
+    }
+  },
+  "features": {
+    "calendar": [
+      "hora",
+      "dia_semana",
+      "mes"
+    ],
+    "lags_hours": [
+      1,
+      24
+    ],
+    "rolling_window_hours": 24,
+    "rolling_uses_shift": 1,
+    "feature_columns_except_timestamp_and_target": 39,
+    "excluded_target_construction_columns": [
+      "pm10_ruim",
+      "pm2_5_ruim",
+      "so2_ruim",
+      "ozone_ruim",
+      "no2_ruim",
+      "co_ruim"
+    ],
+    "model_train_rows": 14016,
+    "model_test_rows": 3480,
+    "train_rows_removed_for_initial_history": 24,
+    "test_rows_removed_for_missing_features": 0
+  }
+}
