@@ -129,10 +129,10 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 
 ## 7. Scrum
 
-- [ ] Atualizações semanais no board
-- [ ] Board refletindo o estado real
+- [x] Atualizações semanais no board
+- [x] Board refletindo o estado real
 
-**Link do board:** [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)
+**Link do board:** [BOARD][(https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)](https://github.com/Adri22K/Projeto-TrilhaB/issues/4#issue-5796278509)
 
 ## 8. Diário de bordo (retrospectiva individual)
 
