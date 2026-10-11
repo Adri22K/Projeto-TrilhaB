@@ -96,14 +96,59 @@ def payload_to_frame(payload: dict[str, Any], variables: list[str]) -> pd.DataFr
     return pd.DataFrame(data)
 
 
-def ensure_new_outputs(paths: list[Path], overwrite: bool) -> None:
-    existing = [str(path.relative_to(ROOT)) for path in paths if path.exists()]
-    if existing and not overwrite:
-        joined = ", ".join(existing)
-        raise FileExistsError(
-            f"Saída bruta já existe e não será sobrescrita: {joined}. "
-            "Use --overwrite somente para uma nova versão deliberada."
-        )
+def validate_existing_outputs(paths: dict[str, Path], config: dict[str, Any]) -> dict[str, Any]:
+    """Valida a coleta já persistida antes de tratar uma reexecução como concluída."""
+    air = pd.read_csv(paths["air_csv"], parse_dates=["timestamp"])
+    weather = pd.read_csv(paths["weather_csv"], parse_dates=["timestamp"])
+    merged = pd.read_csv(paths["merged_csv"], parse_dates=["timestamp"])
+
+    expected_air = {"timestamp", *config["apis"]["air_quality"]["hourly"]}
+    expected_weather = {"timestamp", *config["apis"]["weather"]["hourly"]}
+    if not expected_air.issubset(air.columns):
+        raise ValueError("Coleta existente de qualidade do ar está incompleta")
+    if not expected_weather.issubset(weather.columns):
+        raise ValueError("Coleta existente de clima está incompleta")
+
+    for name, frame in (("air_quality", air), ("weather", weather), ("integrado", merged)):
+        if frame["timestamp"].isna().any() or frame["timestamp"].duplicated().any():
+            raise ValueError(f"Coleta existente inválida em {name}: timestamp ausente ou duplicado")
+
+    expected_start = pd.Timestamp(config["period"]["start_date"])
+    expected_end = pd.Timestamp(config["period"]["end_date"])
+    if merged["timestamp"].min().normalize() != expected_start:
+        raise ValueError("Coleta existente não corresponde à data inicial configurada")
+    if merged["timestamp"].max().normalize() != expected_end:
+        raise ValueError("Coleta existente não corresponde à data final configurada")
+
+    with paths["log_json"].open(encoding="utf-8") as file:
+        log = json.load(file)
+    logged_rows = int(log["integration"]["merged_rows"])
+    if logged_rows != len(merged):
+        raise ValueError("Log da coleta existente diverge do número de linhas integradas")
+
+    return {
+        "air_rows": len(air),
+        "weather_rows": len(weather),
+        "merged_rows": len(merged),
+        "merged_duplicate_timestamps": int(merged["timestamp"].duplicated().sum()),
+    }
+
+
+def existing_outputs_complete(paths: dict[str, Path], overwrite: bool) -> bool:
+    """Retorna True quando uma reexecução pode reutilizar a coleta completa existente."""
+    if overwrite:
+        return False
+    existing = [key for key, path in paths.items() if path.exists()]
+    if not existing:
+        return False
+    if len(existing) == len(paths):
+        return True
+    missing = [key for key, path in paths.items() if not path.exists()]
+    raise FileExistsError(
+        "Conjunto parcial de saídas brutas detectado. "
+        f"Existentes: {existing}; ausentes: {missing}. "
+        "Os arquivos existentes foram preservados para evitar sobrescrita acidental."
+    )
 
 
 def main() -> None:
@@ -126,7 +171,11 @@ def main() -> None:
         "merged_csv": RAW_DIR / "integrado.csv",
         "log_json": RAW_DIR / "coleta_integracao_log.json",
     }
-    ensure_new_outputs(list(paths.values()), args.overwrite)
+    if existing_outputs_complete(paths, args.overwrite):
+        summary = validate_existing_outputs(paths, config)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        print("Reexecução idempotente: coleta completa já existe e nenhuma linha foi duplicada.")
+        return
 
     location = config["location"]
     common_params = {

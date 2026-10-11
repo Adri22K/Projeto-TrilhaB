@@ -1,0 +1,149 @@
+{
+  "split_corte": "2026-04-14 00:00:00",
+  "horizonte_horas": 24,
+  "random_state_referencia": 42,
+  "observacao_seed": "Nao ha sorteio nos tres baselines; random_state nao se aplica aos estimadores escolhidos.",
+  "features_modelos_aprendidos": [
+    "pm10",
+    "pm2_5",
+    "carbon_monoxide",
+    "nitrogen_dioxide",
+    "sulphur_dioxide",
+    "ozone",
+    "temperature_2m",
+    "precipitation",
+    "wind_speed_10m",
+    "hora",
+    "dia_semana",
+    "mes",
+    "pm10_lag_1h",
+    "pm10_lag_24h",
+    "pm10_media_24h",
+    "pm2_5_lag_1h",
+    "pm2_5_lag_24h",
+    "pm2_5_media_24h",
+    "carbon_monoxide_lag_1h",
+    "carbon_monoxide_lag_24h",
+    "carbon_monoxide_media_24h",
+    "nitrogen_dioxide_lag_1h",
+    "nitrogen_dioxide_lag_24h",
+    "nitrogen_dioxide_media_24h",
+    "sulphur_dioxide_lag_1h",
+    "sulphur_dioxide_lag_24h",
+    "sulphur_dioxide_media_24h",
+    "ozone_lag_1h",
+    "ozone_lag_24h",
+    "ozone_media_24h",
+    "temperature_2m_lag_1h",
+    "temperature_2m_lag_24h",
+    "temperature_2m_media_24h",
+    "precipitation_lag_1h",
+    "precipitation_lag_24h",
+    "precipitation_media_24h",
+    "wind_speed_10m_lag_1h",
+    "wind_speed_10m_lag_24h",
+    "wind_speed_10m_media_24h"
+  ],
+  "n_features": 39,
+  "n_treino_csv": 14016,
+  "n_treino_utilizado": 13992,
+  "n_treino_purgado_fronteira_24h": 24,
+  "n_teste": 3480,
+  "taxa_positivos_treino_utilizado": 0.13907947398513437,
+  "taxa_positivos_teste": 0.08591954022988506,
+  "versoes": {
+    "pandas": "2.2.3",
+    "numpy": "2.3.5",
+    "scikit_learn": "1.8.0"
+  },
+  "politica_vazamento": "fit so no treino; purga de 24h na fronteira; persistencia observa somente t e passado",
+  "resultados": [
+    {
+      "modelo": "DummyClassifier",
+      "n_teste": 3480,
+      "acuracia": 0.914080459770115,
+      "precisao_classe_1": 0.0,
+      "recall_classe_1": 0.0,
+      "f1_classe_1": 0.0,
+      "tn": 3181,
+      "fp": 0,
+      "fn": 299,
+      "tp": 0
+    },
+    {
+      "modelo": "Persistencia temporal",
+      "n_teste": 3480,
+      "acuracia": 0.910632183908046,
+      "precisao_classe_1": 0.48013245033112584,
+      "recall_classe_1": 0.48494983277591974,
+      "f1_classe_1": 0.4825291181364393,
+      "tn": 3024,
+      "fp": 157,
+      "fn": 154,
+      "tp": 145
+    },
+    {
+      "modelo": "Gaussian Naive Bayes",
+      "n_teste": 3480,
+      "acuracia": 0.8626436781609196,
+      "precisao_classe_1": 0.2853717026378897,
+      "recall_classe_1": 0.3979933110367893,
+      "f1_classe_1": 0.3324022346368715,
+      "tn": 2883,
+      "fp": 298,
+      "fn": 180,
+      "tp": 119
+    }
+  ],
+  "metricas_por_classe": [
+    {
+      "modelo": "DummyClassifier",
+      "classe": 0,
+      "precisao": 0.914080459770115,
+      "recall": 1.0,
+      "f1": 0.955111845068308,
+      "suporte": 3181
+    },
+    {
+      "modelo": "DummyClassifier",
+      "classe": 1,
+      "precisao": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "suporte": 299
+    },
+    {
+      "modelo": "Persistencia temporal",
+      "classe": 0,
+      "precisao": 0.9515418502202643,
+      "recall": 0.9506444514303678,
+      "f1": 0.9510929391413744,
+      "suporte": 3181
+    },
+    {
+      "modelo": "Persistencia temporal",
+      "classe": 1,
+      "precisao": 0.48013245033112584,
+      "recall": 0.48494983277591974,
+      "f1": 0.4825291181364393,
+      "suporte": 299
+    },
+    {
+      "modelo": "Gaussian Naive Bayes",
+      "classe": 0,
+      "precisao": 0.941234084231146,
+      "recall": 0.9063187676831185,
+      "f1": 0.9234465086483024,
+      "suporte": 3181
+    },
+    {
+      "modelo": "Gaussian Naive Bayes",
+      "classe": 1,
+      "precisao": 0.2853717026378897,
+      "recall": 0.3979933110367893,
+      "f1": 0.3324022346368715,
+      "suporte": 299
+    }
+  ],
+  "nota": "As tres abordagens foram avaliadas nos MESMOS timestamps do teste; persistencia e regra, nao modelo treinado."
+}
