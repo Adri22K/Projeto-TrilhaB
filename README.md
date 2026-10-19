@@ -248,3 +248,11 @@ Métrica principal na classe positiva (teste, uma vez): A definir conforme o pro
 | `Dicionario_de_Dados_Template.md` | Equipe 2 |
 | `Sprint{1–5}_TrilhaB.md` | Grupo na Trilha B |
 | `Sprint{1–5}_TrilhaC.md` | Grupo na Trilha C |
+
+## Reproduzir a Sprint 3
+
+```powershell
+python src/sprint3_baselines.py
+```
+
+O comando lê `data/processed/` e `data/interim/integrado_limpo.csv` e grava métricas, matrizes de confusão e erros em `reports/sprint3/`. Não altera `data/`.
