@@ -123,6 +123,25 @@ Development Team = Adrielle, Victor, João Pedro e Samir
 
 ---
 
+## 6. Correções do feedback da Sprint 1
+
+Em resposta à correção da Sprint 1 (nota 1,1/4,0), o grupo preencheu o `Guia_Alunos_APIs_Trilhas_B_C` para a Trilha B: [`notebooks/00_guia_apis_trilhab.ipynb`](../../notebooks/00_guia_apis_trilhab.ipynb), executado no Colab com as saídas salvas.
+
+| Ponto da correção | O que foi feito |
+|---|---|
+| Evento genérico; sem classe positiva, horizonte e custo do FN | Seção 1 do guia e RFC v0.3 |
+| APIs sem documentação, unidades e justificativa | Seções 2 e 7 do guia (links, endpoints, parâmetros, resolução, limitações, erros) |
+| Parâmetros hard-coded; sem `timeout`/`raise_for_status`/`try-except` | `config` único e função `requisitar` |
+| Resposta não inspecionada; sem JSON bruto | Inspeção de status, `Content-Type`, URL, chaves e unidades; JSON salvo antes de transformar |
+| Uma fonte só; sem `merge` | Ar + clima integrados com `how="inner"` e `validate="one_to_one"` (17.544 linhas, nenhuma descartada) |
+| Qualidade dos dados e alvo ausentes | Partes 4 e 5 do guia, com teste automático de vazamento |
+
+Outras correções: limiar de SO₂ corrigido para 40 µg/m³ (faixa N3 da CETESB; os rótulos não mudam, pois a média de 24 h de SO₂ não passa de ~25 µg/m³); RFC atualizado para v0.3; dicionário com a natureza e a resolução das fontes; RGM corrigido.
+
+**Reprodutibilidade:** 
+
+A coleta ao vivo no Colab devolveu os mesmos dados do repositório (1.960 positivos em 14.040 horas no treino; 299 em 3.480 no teste), e a reexecução dos notebooks 01 a 03 regravou `data/interim`, `data/processed` e as métricas de `reports/sprint3` sem nenhuma diferença.
+
 ## Rubrica de avaliação — Sprint 3 (nota de 0 a 4,0)
 
 | Critério | Peso | O que caracteriza nota máxima | Nota atribuída | Observações |
