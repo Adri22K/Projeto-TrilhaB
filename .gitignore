@@ -1,2 +1,3 @@
 *.rar
 .venv/
+__pycache__/

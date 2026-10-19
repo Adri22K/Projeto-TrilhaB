@@ -163,7 +163,7 @@ projeto-trilha-b-ou-c/
 ** Equipe: Equipe 2**
 - Adrielle Stollemberger RGM: 33948844
 - Victor Almeida de Aquino RGM: 32901321
-- Nicolas Santos Silva RGM: 3287380
+- Nicolas Santos Silva RGM: 32855885
 - Samir Abdul Khalek RGM: 32657994
 - João Pedro Garcia Almeida RGM: 32847629
 
@@ -248,3 +248,11 @@ Métrica principal na classe positiva (teste, uma vez): A definir conforme o pro
 | `Dicionario_de_Dados_Template.md` | Equipe 2 |
 | `Sprint{1–5}_TrilhaB.md` | Grupo na Trilha B |
 | `Sprint{1–5}_TrilhaC.md` | Grupo na Trilha C |
+
+## Reproduzir a Sprint 3
+
+```powershell
+python src/sprint3_baselines.py
+```
+
+O comando lê `data/processed/` e `data/interim/integrado_limpo.csv` e grava métricas, matrizes de confusão e erros em `reports/sprint3/`. Não altera `data/`.
