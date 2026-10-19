@@ -6,7 +6,7 @@
 | **Trilha** | B — Qualidade do ar inadequada
 | **Equipe** | Equipe 2 |
 | **Autores** | • Adrielle Stollemberger RGM: 33948844 • Victor Almeida de Aquino RGM: 32901321 • Nicolas Santos Silva RGM: 3287380  • Samir Abdul Khalek RGM: 32657994 • João Pedro Garcia Almeida RGM: 32847629 |
-| **Status** | Em revisão |
+| **Status** | Revisado (v0.3) |
 | **Data** | 14/09/2026 |
 | **Sprint de referência** | 1 |
 
@@ -33,9 +33,9 @@ Diante disso, o projeto busca utilizar dados históricos de qualidade do ar e co
 | Pergunta | Resposta |
 |---|---|
 | **Qual evento será previsto** | A ocorrência de um período com **qualidade do ar inadequada para a prática de exercícios ao ar livre em São Paulo**. | 
-| **Como será definida a classe positiva?** *(provisória na Sprint 1; limiar formal na Sprint 2, com base no treino)* | Provisoriamente, a classe positiva (**1**) representará horários em que a qualidade do ar for considerada **inadequada para exercícios ao ar livre**, com base nos níveis dos principais poluentes e/ou no índice de qualidade do ar adotado pelo projeto. A classe negativa (**0**) representará horários com condições consideradas adequadas. O limiar definitivo será estabelecido na Sprint 2 após análise dos dados de treinamento e definição do critério de classificação. |
-| **Qual é o horizonte da previsão?** | **Próximas 24 horas**|  permitindo indicar antecipadamente os horários com condições mais ou menos adequadas para exercícios ao ar livre.| 
-| **Qual é a unidade de análise (o que representa cada linha do dataset)?** | Cada linha representará **uma hora em uma determinada localização de São Paulo**, contendo data/hora, localização, concentrações dos poluentes selecionados e variáveis meteorológicas correspondentes. | 
+| **Como será definida a classe positiva?** | `qualidade_inadequada_24h = 1` quando, **24 horas após o instante da previsão**, pelo menos um poluente estiver na faixa **CETESB N3 — RUIM ou pior**, cada um na média de referência da CETESB: MP10 (24 h) > 100 µg/m³; MP2,5 (24 h) > 50 µg/m³; O₃ (8 h) > 130 µg/m³; NO₂ (1 h) > 240 µg/m³; SO₂ (24 h) > 40 µg/m³; CO (8 h) > 11 ppm. Classe `0` = Boa ou Moderada. Definido formalmente na Sprint 2; no treino, 13,96 % das horas são classe 1 (1.960 de 14.040), quase todas por ozônio. |
+| **Qual é o horizonte da previsão?** | **24 horas à frente**: na hora `t` prevê-se a condição do ar na mesma hora do dia seguinte, permitindo ao atleta planejar o treino de amanhã. |
+| **Qual é a unidade de análise (o que representa cada linha do dataset)?** | Cada linha representa **uma hora** (`timestamp` em hora local `America/Sao_Paulo`) no ponto central de São Paulo (lat −23,5489, lon −46,6388), com 6 poluentes e 3 variáveis meteorológicas. São 17.544 linhas (06/09/2024 00h a 06/09/2026 23h). |
 
 ---
 
@@ -43,8 +43,8 @@ Diante disso, o projeto busca utilizar dados históricos de qualidade do ar e co
 
 | Pergunta | Resposta |
 |---|---|
-| Período histórico considerado |  Dados históricos de qualidade do ar e condições meteorológicas de janeiro de 2024 até o período mais recente disponível de 2026.|  
-| O que está dentro do escopo deste projeto | Coleta e integração de dados de qualidade do ar e meteorológicos; análise de poluentes como PM2.5, PM10, CO₂, O₃, NO₂ e SO₂; utilização de variáveis meteorológicas relevantes; tratamento e análise dos dados; desenvolvimento de um modelo para predizer períodos com qualidade do ar adequada ou inadequada; e apresentação dos resultados em um dashboard com indicação dos horários mais favoráveis para exercícios ao ar livre em São Paulo.| 
+| Período histórico considerado | 06/09/2024 a 06/09/2026 (dois anos completos, horários). |
+| O que está dentro do escopo deste projeto | Coleta e integração de dados de qualidade do ar e meteorológicos; análise dos poluentes PM2.5, PM10, CO, O₃, NO₂ e SO₂; utilização de variáveis meteorológicas relevantes; tratamento e análise dos dados; desenvolvimento de um modelo para predizer períodos com qualidade do ar adequada ou inadequada; e apresentação dos resultados em um dashboard com indicação dos horários mais favoráveis para exercícios ao ar livre em São Paulo.| 
 | O que está fora de escopo (explicitamente não será feito) | Diagnóstico ou recomendação médica individual; avaliação das condições de saúde de cada usuário; medição própria da qualidade do ar por sensores; previsão para localidades fora da área definida do projeto; identificação da causa específica da poluição; análise de trânsito como relação causal; e garantia de que determinado horário seja seguro para todas as pessoas. | 
 
 ---
@@ -64,7 +64,7 @@ Resumo de alto nível. O detalhe (unidade, resolução, medido vs. modelado, có
 | Fonte | O que fornece | Papel no projeto (feature / alvo / ambos) |
 |---|---|---|
 | Open-Meteo Air Quality API | Dados horários de qualidade do ar, incluindo PM2.5, PM10, CO, NO₂, SO₂ e O₃ para a localização analisada em São Paulo. | Ambos — os poluentes serão utilizados como dados de entrada e também servirão de base para a definição da classe-alvo de qualidade do ar adequada/inadequada.|
-| Open-Meteo Weather / Historical Weather API | Daos meteorológicos, como temperatura, umidade, precipitação, velocidade do vento e pressão atmosférica, correspondentes ao período e localização analisados. | Feature — variáveis utilizadas para auxiliar o modelo na predição da condição futura da qualidade do ar. |
+| Open-Meteo Weather / Historical Weather API | Dados meteorológicos horários de reanálise: temperatura a 2 m (°C), precipitação (mm) e velocidade do vento a 10 m (km/h), no mesmo período, local e fuso. | Feature — variáveis utilizadas para auxiliar o modelo na predição da condição futura da qualidade do ar. |
 
 **https://github.com/Adri22K/Projeto-TrilhaB/blob/main/docs/Dicionario_de_Dados.md**
 
@@ -88,21 +88,18 @@ Falso negativo	O modelo prevê que determinado horário apresenta condições ad
 
 ## 8. Abordagem proposta (visão de alto nível)
 
-- O projeto inicia com a ingestão dos dados de qualidade do ar por meio da API Open-Meteo, utilizando dados de São Paulo no período de 06/09/2024 a 06/09/2026. Atualmente são coletadas as variáveis PM10, PM2.5, monóxido de carbono (CO), dióxido de carbono (CO₂), dióxido de nitrogênio (NO₂), dióxido de enxofre (SO₂) e ozônio (O₃).
+- A ingestão (`src/coleta_integracao.py`) lê `config/params.yaml` e consulta duas APIs: **Open-Meteo Air Quality** (PM10, PM2.5, CO, NO₂, SO₂ e O₃, horários, em µg/m³) e **Open-Meteo Historical Weather** (temperatura, precipitação e vento, horários), para São Paulo, de 06/09/2024 a 06/09/2026, no fuso `America/Sao_Paulo`. O CO₂, presente na primeira versão, foi retirado por não fazer parte do índice CETESB.
 
-- A coleta já utiliza mecanismos de cache e tentativas automáticas de reconexão, reduzindo requisições repetidas e tratando possíveis falhas temporárias de acesso à API. Os dados retornados são organizados em um DataFrame utilizando Pandas e armazenados em arquivo CSV.
+- As requisições usam `requests` com `timeout`, `raise_for_status()`, novas tentativas automáticas para erros temporários (429/5xx) e validação da estrutura do JSON. A resposta de cada API é inspecionada (status, `Content-Type`, URL, chaves, unidades, tamanho) e **salva como JSON bruto** em `data/raw/` antes de qualquer transformação. A coleta é idempotente: reexecutar não duplica nem sobrescreve o bruto.
 
-- Na implementação atual, os registros horários são transformados em médias diárias. Entretanto, como o objetivo definido para o projeto é prever os melhores horários para a prática de exercícios ao ar livre, essa etapa será ajustada para preservar a granularidade horária dos dados, permitindo analisar e posteriormente prever diferenças na qualidade do ar ao longo do dia.
+- A granularidade é **horária** em todas as etapas (a agregação diária da primeira versão foi abandonada). As duas fontes são integradas pelo `timestamp` com `how="inner"` e `validate="one_to_one"`, resultando em 17.544 linhas e nenhuma hora descartada.
 
-- Nas próximas etapas, será realizada a limpeza e tratamento dos dados, seguida do split entre treino, validação e teste. A EDA será realizada sobre os dados de treino tratados e auxiliará na definição formal da variável-alvo, classificando os períodos como adequados ou inadequados para exercícios ao ar livre.
+- Em seguida: limpeza com log (Sprint 2) → split temporal (corte em 14/04/2026) → EDA só no treino → alvo `qualidade_inadequada_24h` → features com lags e médias móveis apenas do passado → Pipeline do scikit-learn (`ColumnTransformer` + classificador) com `fit` só no treino → baselines (Dummy, persistência, Naive Bayes) → iteração de features (Sprint 4) → limiar escolhido em validação temporal dentro do treino → teste medido uma única vez → Model Card e `joblib` do Pipeline.
 
-- Posteriormente, será desenvolvido um Pipeline do Scikit-learn, contendo as etapas de pré-processamento e classificação. O desempenho será comparado com baselines e serão realizadas iterações de features e retreinamentos. O limiar de decisão será escolhido no conjunto de validação, considerando principalmente a redução de falsos negativos e o recall da classe positiva. O conjunto de teste será utilizado apenas para a avaliação final.
+- Um painel para o atleta (horários favoráveis / atenção / evitar) poderá ser apresentado na Mostra como recurso adicional.
 
-- Ao final, serão produzidos o Model Card e o artefato do Pipeline treinado em formato joblib. Um possível dashboard será utilizado apenas como recurso adicional para apresentar de maneira visual os horários previstos como mais ou menos favoráveis para a prática de exercícios ao ar livre.
-
-
-**O fluxo ficaria assim:**
-API Open-Meteo → cache + retry → coleta dos dados horários → DataFrame Pandas → armazenamento CSV → limpeza e tratamento → split → EDA no treino → definição do alvo → features → Pipeline Scikit-learn → baseline e treinamento → validação e escolha do limiar → teste final → Model Card + joblib
+**O fluxo fica assim:**
+API Open-Meteo (ar + clima) → requests com timeout/retry → inspeção + JSON bruto em `data/raw` → merge horário → limpeza (`data/interim`) → split temporal → EDA no treino → alvo → features (`data/processed`) → Pipeline scikit-learn → baselines → iteração → limiar na validação → teste final → Model Card + joblib
 
 ---
 
@@ -136,7 +133,7 @@ Como o falso negativo foi considerado o erro de maior impacto, será priorizado 
 
 Além do desempenho preditivo, serão considerados critérios de sucesso a integração consistente das fontes de dados, tratamento adequado de valores ausentes, dicionário de dados alinhado às variáveis efetivamente utilizadas pelo modelo e documentação das características, limitações e resultados do modelo no Model Card.
 
-Eu manteria sem uma porcentagem de recall por enquanto. Como a própria atividade fala em limiar definido posteriormente, colocar algo como “recall ≥ 80%” agora seria uma escolha sem evidência. Depois da EDA e do primeiro modelo vocês terão base para estabelecer uma meta realista.
+Referência mínima já medida (Sprint 3): o baseline de persistência teve recall de 0,48 na classe 1 (145 de 299 horas inadequadas detectadas, 154 FN). Um modelo só será adotado se superar esse recall no limiar congelado na validação.
 
 ---
 
@@ -186,5 +183,6 @@ Algumas definições serão realizadas nas próximas etapas do projeto a partir 
 |---|---|---|---|
 | v0.1 | 14/09/2026 | Professora | Arquivo base do RFC (Sprint 1) |
 | v0.2 | 14/09/2026 | Todos os integrantes | Primeira versão do RFC (Sprint 1) |
+| v0.3 | 19/10/2026 | Todos os integrantes | Correções pós-feedback da Sprint 1: classe positiva formal, horizonte, unidade de análise e período alinhados ao código; CO₂ e agregação diária removidos; abordagem atualizada (duas APIs, JSON bruto, merge `one_to_one`); limiar de SO₂ corrigido para 40 µg/m³ |
 | | | | |
 
