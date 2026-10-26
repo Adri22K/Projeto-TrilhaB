@@ -5,7 +5,7 @@
 | **Título** |  Predição da Qualidade do Ar com Foco nos Melhores Horários para a Prática de Exercícios ao Ar Livre em São Paulo |
 | **Trilha** | B — Qualidade do ar inadequada
 | **Equipe** | Equipe 2 |
-| **Autores** | • Adrielle Stollemberger RGM: 33948844 • Victor Almeida de Aquino RGM: 32901321 • Nicolas Santos Silva RGM: 3287380  • Samir Abdul Khalek RGM: 32657994 • João Pedro Garcia Almeida RGM: 32847629 |
+| **Autores** | • Adrielle Stollemberger RGM: 33948844 • Victor Almeida de Aquino RGM: 32901321 • Nicolas Santos Silva RGM: 32855885 • Samir Abdul Khalek RGM: 32657994 • João Pedro Garcia Almeida RGM: 32847629 |
 | **Status** | Em revisão |
 | **Data** | 14/09/2026 |
 | **Sprint de referência** | 1 |
