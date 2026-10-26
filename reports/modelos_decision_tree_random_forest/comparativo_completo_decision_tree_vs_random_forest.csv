@@ -1,0 +1,8 @@
+modelo,categoria,limiar,acuracia,precisao_c1,recall_c1,f1_c1,fn,fp,status_aprovacao
+DummyClassifier,Piso de Acuracia,0.5,0.9141,0.0,0.0,0.0,299,0,Reprovado (Recall zero)
+Persistencia Temporal,Piso Real de Decisao,0.5,0.9106,0.4801,0.4849,0.4825,154,157,Referencia a ser batida
+Decision Tree (Limiar Padrao 0.50),Decision Tree,0.5,0.8591954022988506,0.3309734513274336,0.6254180602006689,0.43287037037037035,112,378,APROVADO (Bateu Piso)
+Decision Tree (Limiar F2 0.65),Decision Tree,0.65,0.860632183908046,0.314,0.5250836120401338,0.392991239048811,142,343,APROVADO (Bateu Piso)
+Random Forest (Limiar Padrao 0.50),Random Forest,0.5,0.9083333333333333,0.4621212121212121,0.4080267558528428,0.433392539964476,177,142,Abaixo do Piso em FN
+Random Forest (Limiar F1 0.57),Random Forest,0.5700000000000001,0.914080459770115,0.5,0.33444816053511706,0.40080160320641284,199,100,Abaixo do Piso em FN
+Random Forest (Limiar F2 0.35),Random Forest,0.35,0.889367816091954,0.39663461538461536,0.5518394648829431,0.46153846153846156,134,251,APROVADO (Bateu Piso)

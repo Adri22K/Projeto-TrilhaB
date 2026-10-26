@@ -48,7 +48,7 @@ sprint2:
     thresholds:
       pm10_24h_ug_m3: 100
       pm2_5_24h_ug_m3: 50
-      sulphur_dioxide_24h_ug_m3: 40   # CETESB N3 para SO2 (24 h) começa em 40
+      sulphur_dioxide_24h_ug_m3: 50
       ozone_8h_ug_m3: 130
       nitrogen_dioxide_1h_ug_m3: 240
       carbon_monoxide_8h_ppm: 11
