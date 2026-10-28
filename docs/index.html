@@ -119,25 +119,37 @@
         <section id="modelos">
           <p class="section-kicker">03 · Aprendizado de máquina</p>
           <h2>Como funcionam os modelos?</h2>
-          <p>Antes de comparar algoritmos, vamos imaginar um exemplo simples. Uma árvore pode começar perguntando se a concentração de um poluente ultrapassa certo limite. Dependendo da resposta, faz outra pergunta e termina em uma folha que indica “adequado” ou “inadequado”. Os limites abaixo são ilustrativos, não regras reais do projeto.</p>
+          <p>Para entender como uma Árvore de Decisão organiza perguntas, imagine um exemplo ligado à previsão da qualidade do ar. A sequência abaixo mostra possíveis caminhos para interpretar uma previsão e decidir se vale acompanhar as condições antes de realizar atividades ao ar livre. É apenas uma ilustração: não representa regras reais aprendidas pelos modelos deste projeto.</p>
           <figure class="diagram">
-            <svg viewBox="0 0 800 300" role="img" aria-labelledby="tree-title tree-desc">
-              <title id="tree-title">Exemplo ilustrativo de uma pequena árvore de decisão</title>
-              <desc id="tree-desc">Um nó pergunta se um indicador de poluição está acima de um limite ilustrativo. Se sim, a previsão é risco; se não, pergunta se a velocidade do vento é baixa. As folhas apresentam risco ou condição possivelmente adequada.</desc>
+            <svg viewBox="0 0 900 330" role="img" aria-labelledby="tree-title tree-desc">
+              <title id="tree-title">Exemplo didático de decisões sobre a qualidade do ar</title>
+              <desc id="tree-desc">A pergunta inicial é se a qualidade do ar prevista é ruim. Se sim, recomenda-se reduzir atividades ao ar livre. Se não, verifica-se se os poluentes previstos estão elevados. Se estiverem, acompanha-se a evolução do ar; caso contrário, as condições são consideradas favoráveis neste exemplo ilustrativo.</desc>
               <g font-family="Arial, sans-serif" text-anchor="middle">
-                <rect x="255" y="18" width="290" height="64" rx="12" fill="#e8eef0" stroke="#b8c7cd" stroke-width="2"/>
-                <text x="400" y="44" font-size="17" fill="#20343d">Indicador de poluição</text><text x="400" y="65" font-size="16" fill="#20343d">acima do limite?</text>
-                <path d="M330 82 L205 135" stroke="#73838b" stroke-width="2"/><path d="M470 82 L595 135" stroke="#73838b" stroke-width="2"/>
-                <text x="250" y="108" font-size="14" fill="#52636b">Sim</text><text x="545" y="108" font-size="14" fill="#52636b">Não</text>
-                <rect x="90" y="135" width="230" height="58" rx="10" fill="#f1f3f4" stroke="#cbd4d8" stroke-width="2"/><text x="205" y="169" font-size="18" fill="#20343d">Prever risco</text>
-                <rect x="480" y="135" width="230" height="58" rx="10" fill="#e8eef0" stroke="#b8c7cd" stroke-width="2"/><text x="595" y="160" font-size="16" fill="#20343d">Vento abaixo</text><text x="595" y="180" font-size="16" fill="#20343d">do limite?</text>
-                <path d="M545 193 L485 238" stroke="#73838b" stroke-width="2"/><path d="M645 193 L700 238" stroke="#73838b" stroke-width="2"/>
-                <text x="500" y="217" font-size="14" fill="#52636b">Sim</text><text x="680" y="217" font-size="14" fill="#52636b">Não</text>
-                <rect x="395" y="238" width="180" height="45" rx="9" fill="#f1f3f4" stroke="#cbd4d8" stroke-width="2"/><text x="485" y="266" font-size="16" fill="#20343d">Investigar risco</text>
-                <rect x="610" y="238" width="180" height="45" rx="9" fill="#f1f3f4" stroke="#cbd4d8" stroke-width="2"/><text x="700" y="266" font-size="16" fill="#20343d">Menor sinal de risco</text>
+                <rect x="300" y="18" width="300" height="66" rx="12" fill="#e8eef0" stroke="#b8c7cd" stroke-width="2"/>
+                <text x="450" y="46" font-size="18" fill="#20343d">Qualidade do ar prevista</text>
+                <text x="450" y="68" font-size="18" fill="#20343d">é ruim?</text>
+                <path d="M350 84 L210 145" stroke="#73838b" stroke-width="2" fill="none"/>
+                <path d="M550 84 L690 145" stroke="#73838b" stroke-width="2" fill="none"/>
+                <text x="270" y="112" font-size="15" fill="#52636b">Sim</text>
+                <text x="630" y="112" font-size="15" fill="#52636b">Não</text>
+                <rect x="35" y="145" width="350" height="66" rx="11" fill="#f1f3f4" stroke="#cbd4d8" stroke-width="2"/>
+                <text x="210" y="173" font-size="17" fill="#20343d">Recomendar reduzir atividades</text>
+                <text x="210" y="194" font-size="17" fill="#20343d">ao ar livre</text>
+                <rect x="535" y="145" width="310" height="66" rx="11" fill="#e8eef0" stroke="#b8c7cd" stroke-width="2"/>
+                <text x="690" y="173" font-size="17" fill="#20343d">Poluentes previstos</text>
+                <text x="690" y="194" font-size="17" fill="#20343d">estão elevados?</text>
+                <path d="M625 211 L550 254" stroke="#73838b" stroke-width="2" fill="none"/>
+                <path d="M755 211 L800 254" stroke="#73838b" stroke-width="2" fill="none"/>
+                <text x="578" y="235" font-size="15" fill="#52636b">Sim</text>
+                <text x="786" y="235" font-size="15" fill="#52636b">Não</text>
+                <rect x="420" y="254" width="260" height="54" rx="10" fill="#f1f3f4" stroke="#cbd4d8" stroke-width="2"/>
+                <text x="550" y="276" font-size="16" fill="#20343d">Acompanhar evolução</text>
+                <text x="550" y="296" font-size="16" fill="#20343d">do ar</text>
+                <rect x="695" y="254" width="195" height="54" rx="10" fill="#f1f3f4" stroke="#cbd4d8" stroke-width="2"/>
+                <text x="792" y="286" font-size="16" fill="#20343d">Condições favoráveis</text>
               </g>
             </svg>
-            <figcaption>Figura 2. Árvore didática simplificada para demonstrar a lógica de perguntas e respostas. Os limites e resultados não representam regras treinadas do modelo.</figcaption>
+            <figcaption>Figura 2. Exemplo didático de uma sequência de decisões relacionadas à previsão da qualidade do ar. Os caminhos são ilustrativos e não representam regras treinadas do modelo.</figcaption>
           </figure>
           <h3>Árvore de Decisão</h3>
           <p>Uma Árvore de Decisão aprende regras a partir dos exemplos. É relativamente fácil de interpretar, mas uma árvore muito profunda pode decorar detalhes dos dados de treinamento e errar em novos registros. Esse problema é chamado <strong>overfitting</strong>.</p>
