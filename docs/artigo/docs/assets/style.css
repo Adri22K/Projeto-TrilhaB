@@ -1,13 +1,13 @@
-/* Inteligência Atmosférica — estilos responsivos para GitHub Pages */
+/* CADENC.IA — estilos responsivos para GitHub Pages */
 :root {
-  --ink: #1e2a30;
-  --muted: #5c6b72;
-  --line: #d9e0e3;
+  --ink: #0f3b4c;
+  --muted: #526b72;
+  --line: #d9e5e3;
   --paper: #ffffff;
-  --soft: #f4f7f8;
-  --soft-blue: #e8f0f3;
-  --accent: #28566a;
-  --accent-dark: #183b4a;
+  --soft: #f3f5ee;
+  --soft-blue: #e3f0ed;
+  --accent: #1f7a7a;
+  --accent-dark: #0f3b4c;
   --warning: #f6f2e9;
   --max: 1180px;
 }
@@ -22,7 +22,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid #8aaab7; outline-offs
 .site-header { background: rgba(255,255,255,.97); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
 .nav-wrap { max-width: var(--max); margin: auto; padding: 12px 24px; display: flex; gap: 24px; align-items: center; justify-content: space-between; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 750; text-decoration: none; white-space: nowrap; }
-.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-dark); color: white; font-size: 13px; letter-spacing: .04em; }
+.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-dark); color: #8fc7b7; font-size: 13px; letter-spacing: .04em; }
+.brand-dot { color: #ff9f5a; }
+.brand-ia { color: #1f7a7a; }
+.hero-logo { display: block; width: min(100%, 230px); height: auto; margin: 0 auto 16px; border-radius: 14px; }
 #site-nav { display: flex; align-items: center; gap: 18px; }
 #site-nav a { font-size: .88rem; text-decoration: none; color: var(--muted); }
 #site-nav a:hover { color: var(--accent-dark); }
@@ -72,7 +75,7 @@ th, td { text-align: left; vertical-align: top; padding: 13px 14px; border-botto
 thead th { background: var(--soft-blue); font-weight: 750; }
 tbody tr:nth-child(even) { background: #fafbfb; }
 tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
-.highlight { background: #f1f5f6 !important; }
+.highlight { background: #e9f3ef !important; }
 .pending-row { color: var(--muted); font-style: italic; }
 pre { overflow-x: auto; padding: 18px; border-radius: 10px; background: #202a30; color: #f4f7f8; line-height: 1.55; font-size: .88rem; }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
