@@ -84,6 +84,9 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .reference-list li { padding-left: 3px; margin-bottom: 10px; }
 .site-footer { background: #f3f6f7; border-top: 1px solid var(--line); padding: 38px 24px 18px; }
 .footer-grid { max-width: var(--max); margin: auto; display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 34px; }
+
+.author-list { list-style: none; margin: 0; padding: 0; }
+.author-list li { margin: 0 0 7px; font-size: .9rem; line-height: 1.55; }
 .footer-grid h2 { font-size: 1.1rem; margin: 0 0 8px; }
 .footer-grid h3 { font-size: .95rem; margin: 0 0 8px; }
 .footer-grid p { margin: 4px 0 10px; font-size: .9rem; }
