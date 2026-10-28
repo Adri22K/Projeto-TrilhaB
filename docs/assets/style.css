@@ -187,3 +187,30 @@ pre { background: #0f2934; border: 1px solid #1f7a7a; }
   .hero-note { padding: 12px; }
   .hero-logo { max-width: 300px; }
 }
+
+
+/* Ajustes de marca: símbolo claro e título nas cores oficiais do CADENC.IA */
+.brand-mark {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 11px;
+  background: #f3f5ee;
+  box-shadow: 0 4px 12px rgba(15,59,76,.12);
+  flex: 0 0 42px;
+}
+.brand-mark::after { content: none; }
+.brand { gap: 10px; }
+.wordmark { display: block; color: var(--ink); }
+.wordmark .brand-dot { color: var(--orange); }
+.wordmark .brand-ia { color: var(--accent); }
+.hero-title-sub {
+  display: block;
+  margin-top: 8px;
+  color: var(--accent-dark);
+  font-size: .48em;
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
