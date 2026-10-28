@@ -122,7 +122,8 @@ Pastas: `raw` = bruto da API/merge; `interim` = limpo (Sprint 2); `processed` = 
 ## 4. Estrutura do repositório
 
 ```text
-projeto-trilha-b-ou-c/
+projeto-trilha-b/
+
 ├── README.md
 ├── requirements.txt
 ├── config/
@@ -140,11 +141,16 @@ projeto-trilha-b-ou-c/
 │   ├── 03_baseline.ipynb
 │   ├── 04_features_iteracao.ipynb
 │   └── 05_modelos.ipynb
-├── src/                         # opcional
+├── src/
 ├── models/
 ├── docs/
 │   ├── RFC.md
 │   ├── Dicionario_de_Dados.md
+│   ├── artigo/
+│   │   └── inteligencia-atmosferica.md
+│   ├── imagens/
+│   │   ├── logo.png
+│   │   └── graficos/
 │   └── sprints/
 └── reports/
 ```
