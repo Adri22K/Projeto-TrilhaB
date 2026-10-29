@@ -170,6 +170,8 @@ Development Team = Adrielle, Victor, João e Samir
 
 **Link do board:[BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)**
 
+**Board (Projects):** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
+
 
 ## 6. Diário de bordo (retrospectiva individual)
 

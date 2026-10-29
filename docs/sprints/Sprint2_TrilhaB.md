@@ -134,6 +134,8 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 
 **Link do board:** [BOARD][(https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)](https://github.com/Adri22K/Projeto-TrilhaB/issues/4#issue-5796278509)
 
+**Board (Projects):** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
+
 ## 8. Diário de bordo (retrospectiva individual)
 
 | Integrante | O que fiz nesta Sprint | Dificuldades | O que pretendo manter/ajustar |

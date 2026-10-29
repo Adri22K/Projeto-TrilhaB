@@ -169,7 +169,9 @@ projeto-trilha-b-ou-c/
 
 **Repositório / board:**
 - Link do repositório: https://github.com/Adri22K/Projeto-TrilhaB/tree/main
-- Link do board: https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970
+- Link do board: https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970\
+
+**Board (Projects):** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 ## Problema
 
