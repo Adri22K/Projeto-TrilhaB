@@ -1,0 +1,222 @@
+{
+  "split_corte": "2026-04-14 00:00:00",
+  "horizonte_horas": 24,
+  "n_treino_csv": 14016,
+  "n_treino_utilizado": 13992,
+  "n_teste": 3480,
+  "janelas_validacao": [
+    [
+      "2025-07-01",
+      "2025-10-01"
+    ],
+    [
+      "2025-10-01",
+      "2026-01-01"
+    ],
+    [
+      "2026-01-01",
+      null
+    ]
+  ],
+  "teste_vazamento_instantes": [
+    "2024-09-10 04:00:00",
+    "2025-02-02 06:00:00",
+    "2025-06-27 09:00:00",
+    "2025-11-19 12:00:00",
+    "2026-04-13 15:00:00",
+    "2026-09-05 18:00:00"
+  ],
+  "features_novas_criadas": [
+    "ozone_media_8h",
+    "ozone_max_8h",
+    "ozone_8h_max_24h",
+    "ozone_8h_max_24h_delta",
+    "horas_ruins_24h",
+    "temperature_max_24h",
+    "temperature_max_24h_delta",
+    "hora_sin",
+    "hora_cos",
+    "mes_sin",
+    "mes_cos",
+    "elevacao_solar_alvo"
+  ],
+  "validacao_s2_por_normalizacao": {
+    "standard": {
+      "recall_medio": 0.46336164606284863,
+      "f1_medio": 0.40270844142118717,
+      "f1_por_janela": [
+        0.25,
+        0.4593,
+        0.4988
+      ]
+    },
+    "yeo_johnson": {
+      "recall_medio": 0.6442313981629431,
+      "f1_medio": 0.45818060832479013,
+      "f1_por_janela": [
+        0.3425,
+        0.5067,
+        0.5253
+      ]
+    }
+  },
+  "selecao_por_normalizacao": {
+    "standard": {
+      "familias": [
+        "pm2_5",
+        "nitrogen_dioxide",
+        "wind_speed_10m",
+        "calendario_bruto",
+        "ozone_8h",
+        "episodio",
+        "hora_ciclica",
+        "solar"
+      ],
+      "n_features": 21,
+      "recall_medio": 0.7640965622926771,
+      "f1_medio": 0.6124153994254321,
+      "f1_por_janela": [
+        0.5149,
+        0.6429,
+        0.6794
+      ]
+    },
+    "yeo_johnson": {
+      "familias": [
+        "pm10",
+        "sulphur_dioxide",
+        "precipitation",
+        "wind_speed_10m",
+        "ozone_8h",
+        "temp_max",
+        "hora_ciclica",
+        "mes_ciclico",
+        "solar"
+      ],
+      "n_features": 25,
+      "recall_medio": 0.7856161055513508,
+      "f1_medio": 0.618733814300133,
+      "f1_por_janela": [
+        0.5066,
+        0.6471,
+        0.7025
+      ]
+    }
+  },
+  "normalizacao_escolhida": "yeo_johnson",
+  "features_congeladas": [
+    "pm10",
+    "pm10_lag_1h",
+    "pm10_lag_24h",
+    "pm10_media_24h",
+    "sulphur_dioxide",
+    "sulphur_dioxide_lag_1h",
+    "sulphur_dioxide_lag_24h",
+    "sulphur_dioxide_media_24h",
+    "precipitation",
+    "precipitation_lag_1h",
+    "precipitation_lag_24h",
+    "precipitation_media_24h",
+    "wind_speed_10m",
+    "wind_speed_10m_lag_1h",
+    "wind_speed_10m_lag_24h",
+    "wind_speed_10m_media_24h",
+    "ozone_media_8h",
+    "ozone_max_8h",
+    "temperature_max_24h",
+    "temperature_max_24h_delta",
+    "hora_sin",
+    "hora_cos",
+    "mes_sin",
+    "mes_cos",
+    "elevacao_solar_alvo"
+  ],
+  "n_features": 25,
+  "random_state_referencia": 42,
+  "resultados_teste": [
+    {
+      "modelo": "DummyClassifier",
+      "n_teste": 3480,
+      "acuracia": 0.914080459770115,
+      "precisao_classe_1": 0.0,
+      "recall_classe_1": 0.0,
+      "f1_classe_1": 0.0,
+      "tn": 3181,
+      "fp": 0,
+      "fn": 299,
+      "tp": 0
+    },
+    {
+      "modelo": "Persistencia temporal",
+      "n_teste": 3480,
+      "acuracia": 0.910632183908046,
+      "precisao_classe_1": 0.48013245033112584,
+      "recall_classe_1": 0.48494983277591974,
+      "f1_classe_1": 0.4825291181364393,
+      "tn": 3024,
+      "fp": 157,
+      "fn": 154,
+      "tp": 145
+    },
+    {
+      "modelo": "Gaussian Naive Bayes",
+      "n_teste": 3480,
+      "acuracia": 0.8795977011494253,
+      "precisao_classe_1": 0.3785425101214575,
+      "recall_classe_1": 0.6254180602006689,
+      "f1_classe_1": 0.47162673392181587,
+      "tn": 2874,
+      "fp": 307,
+      "fn": 112,
+      "tp": 187
+    }
+  ],
+  "lift_s3_s4": [
+    {
+      "modelo": "DummyClassifier",
+      "recall_classe_1_s3": 0.0,
+      "recall_classe_1_s4": 0.0,
+      "f1_classe_1_s3": 0.0,
+      "f1_classe_1_s4": 0.0,
+      "delta_recall": 0.0,
+      "delta_f1": 0.0,
+      "fn_s3": 299,
+      "fn_s4": 299,
+      "delta_fn": 0,
+      "fp_s3": 0,
+      "fp_s4": 0
+    },
+    {
+      "modelo": "Persistencia temporal",
+      "recall_classe_1_s3": 0.4849,
+      "recall_classe_1_s4": 0.4849,
+      "f1_classe_1_s3": 0.4825,
+      "f1_classe_1_s4": 0.4825,
+      "delta_recall": 0.0,
+      "delta_f1": 0.0,
+      "fn_s3": 154,
+      "fn_s4": 154,
+      "delta_fn": 0,
+      "fp_s3": 157,
+      "fp_s4": 157
+    },
+    {
+      "modelo": "Gaussian Naive Bayes",
+      "recall_classe_1_s3": 0.398,
+      "recall_classe_1_s4": 0.6254,
+      "f1_classe_1_s3": 0.3324,
+      "f1_classe_1_s4": 0.4716,
+      "delta_recall": 0.2274,
+      "delta_f1": 0.1392,
+      "fn_s3": 180,
+      "fn_s4": 112,
+      "delta_fn": -68,
+      "fp_s3": 298,
+      "fp_s4": 307
+    }
+  ],
+  "versoes": {
+    "pandas": "2.2.3",
+    "numpy": "2.3.5"
+  }
+}
