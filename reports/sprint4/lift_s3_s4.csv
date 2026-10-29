@@ -1,0 +1,4 @@
+modelo,recall_classe_1_s3,recall_classe_1_s4,f1_classe_1_s3,f1_classe_1_s4,delta_recall,delta_f1,fn_s3,fn_s4,delta_fn,fp_s3,fp_s4
+DummyClassifier,0.0,0.0,0.0,0.0,0.0,0.0,299,299,0,0,0
+Persistencia temporal,0.4849,0.4849,0.4825,0.4825,0.0,0.0,154,154,0,157,157
+Gaussian Naive Bayes,0.398,0.6254,0.3324,0.4716,0.2274,0.1392,180,112,-68,298,307

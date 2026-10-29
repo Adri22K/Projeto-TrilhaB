@@ -53,3 +53,34 @@ sprint2:
       nitrogen_dioxide_1h_ug_m3: 240
       carbon_monoxide_8h_ppm: 11
     co_ug_m3_to_ppm_factor: 0.0008727
+
+sprint4:
+  # Escolhidas por validacao temporal DENTRO do treino (src/sprint4_features.py).
+  # Lista CONGELADA: a Sprint 5 e obrigada a usar estas colunas e esta normalizacao.
+  normalizacao: yeo_johnson
+  features_congeladas:
+    - pm10
+    - pm10_lag_1h
+    - pm10_lag_24h
+    - pm10_media_24h
+    - sulphur_dioxide
+    - sulphur_dioxide_lag_1h
+    - sulphur_dioxide_lag_24h
+    - sulphur_dioxide_media_24h
+    - precipitation
+    - precipitation_lag_1h
+    - precipitation_lag_24h
+    - precipitation_media_24h
+    - wind_speed_10m
+    - wind_speed_10m_lag_1h
+    - wind_speed_10m_lag_24h
+    - wind_speed_10m_media_24h
+    - ozone_media_8h
+    - ozone_max_8h
+    - temperature_max_24h
+    - temperature_max_24h_delta
+    - hora_sin
+    - hora_cos
+    - mes_sin
+    - mes_cos
+    - elevacao_solar_alvo

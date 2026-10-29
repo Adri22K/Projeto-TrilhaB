@@ -1,4 +1,4 @@
-# Dicionário de dados v0.2
+# Dicionário de dados v0.3
 
 ## Chave e fontes
 
@@ -35,6 +35,32 @@ As colunas auxiliares de construção do alvo (`pm10_ruim`, `pm2_5_ruim`, `so2_r
 | `<variável>_media_24h` | Média das 24 horas anteriores, sempre após `.shift(1)`; resume o histórico recente sem incluir o instante atual ou o futuro |
 
 Os padrões de lag e média móvel são aplicados aos seis poluentes e às três variáveis meteorológicas. As janelas foram definidas no treino e aplicadas sem alteração ao teste.
+
+## Features derivadas da Sprint 4 (v0.3)
+
+Todas usam somente o instante `t` e o passado, exceto `elevacao_solar_alvo`, que é astronômica e conhecida com antecedência. Código: `src/sprint4_features.py`. Teste automático de vazamento em `reports/sprint4/resultado_execucao.json`.
+
+| Feature | Tipo/unidade | Definição | Status no pipeline congelado |
+|---|---|---|---|
+| `ozone_media_8h` | µg/m³ | média do O₃ nas 8 h terminando em `t` (métrica CETESB do O₃) | **mantida** |
+| `ozone_max_8h` | µg/m³ | máximo do O₃ nas últimas 8 h | **mantida** |
+| `ozone_8h_max_24h` | µg/m³ | maior média de 8 h de O₃ nas últimas 24 h | descartada na seleção |
+| `ozone_8h_max_24h_delta` | µg/m³ | `ozone_8h_max_24h(t) − ozone_8h_max_24h(t−24)` | descartada na seleção |
+| `horas_ruins_24h` | horas (0–24) | nº de horas em classe N3+ nas últimas 24 h | descartada na seleção |
+| `temperature_max_24h` | °C | máxima de temperatura nas últimas 24 h | **mantida** |
+| `temperature_max_24h_delta` | °C | `temperature_max_24h(t) − temperature_max_24h(t−24)` | **mantida** |
+| `hora_sin`, `hora_cos` | adimensional (−1 a 1) | `sin/cos(2π·hora/24)` | **mantidas** (substituem `hora`) |
+| `mes_sin`, `mes_cos` | adimensional (−1 a 1) | `sin/cos(2π·(mês−1)/12)` | **mantidas** (substituem `mes`) |
+| `elevacao_solar_alvo` | graus | altura do sol em São Paulo na hora prevista `t + 24 h` (fórmula da NOAA) | **mantida** |
+| `estado_atual` | binária | classe N3+ no instante `t` (mesma regra do alvo, só passado) | usada **só** pelo baseline de persistência |
+
+### Lista congelada para a Sprint 5 (25 colunas)
+
+Famílias completas (valor, `lag_1h`, `lag_24h`, `media_24h`) de `pm10`, `sulphur_dioxide`, `precipitation` e `wind_speed_10m`, mais `ozone_media_8h`, `ozone_max_8h`, `temperature_max_24h`, `temperature_max_24h_delta`, `hora_sin`, `hora_cos`, `mes_sin`, `mes_cos` e `elevacao_solar_alvo`. A lista está em `config/params.yaml` (`sprint4.features_congeladas`) e em `models/features_s4.json`.
+
+**Retiradas na seleção (validação temporal dentro do treino):** famílias de `ozone`, `pm2_5`, `nitrogen_dioxide`, `carbon_monoxide` e `temperature_2m`; `hora`, `dia_semana` e `mes` brutos; `ozone_8h_max_24h`, `ozone_8h_max_24h_delta` e `horas_ruins_24h`.
+
+**Preparação congelada:** `SimpleImputer(median)` + `PowerTransformer(yeo-johnson, standardize=True)` dentro do `ColumnTransformer`, ajustado só no treino (`models/column_transformer_s4.joblib`).
 
 ## Log de limpeza
 

@@ -192,9 +192,12 @@ python -m venv .venv
 pip install -r requirements.txt
 python src/coleta_integracao.py
 python src/prepara_sprint2.py
+python src/sprint3_baselines.py
+python src/sprint4_features.py
 
 Configuração: `config/params.yaml`
 Notebooks: 01 → 05.
+Guia de investigação das APIs (Sprint 1, executado no Colab): `notebooks/00_guia_apis_trilhaB.ipynb`
 
 ## Dados
 
@@ -210,7 +213,8 @@ Dicionário: `docs/Dicionario_de_Dados.md`
 
 ## Modelo
 
-Baseline: A definir nas próximas Sprints.
+Baseline (Sprint 3, teste medido uma vez, sem ajuste de limiar): persistência temporal — recall 0,48 na classe 1 (145 de 299 horas inadequadas detectadas; 154 FN, 157 FP). Gaussian Naive Bayes: recall 0,40 (180 FN). DummyClassifier: recall 0 (299 FN), apesar de 91% de acurácia.
+Sprint 4 (features novas + pipeline congelado, mesmo split): Naive Bayes subiu de recall 0,40 para 0,63 e de F1 0,33 para 0,47 (FN 180 → 112). Persistência e Dummy não mudam (regra fixa e classe majoritária). Pipeline congelado: 25 features, mediana + Yeo-Johnson, em `models/column_transformer_s4.joblib`.
 Modelo final: A definir na Sprint 5 após treinamento e comparação dos modelos.
 Limiar (escolhido na validação) e por quê: A definir utilizando os dados de validação, considerando principalmente o custo associado aos falsos negativos.
 Métrica principal na classe positiva (teste, uma vez): A definir conforme o protocolo de avaliação do projeto. A avaliação final no conjunto de teste será realizada apenas uma vez.
