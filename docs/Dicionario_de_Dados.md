@@ -1,4 +1,4 @@
-# Dicionário de dados v0.3
+# Dicionário de dados v0.4
 
 ## Chave e fontes
 
@@ -63,6 +63,20 @@ Famílias completas (valor, `lag_1h`, `lag_24h`, `media_24h`) de `pm10`, `sulphu
 **Retiradas na seleção (validação temporal dentro do treino):** famílias de `ozone`, `pm2_5`, `nitrogen_dioxide`, `carbon_monoxide` e `temperature_2m`; `hora`, `dia_semana` e `mes` brutos; `ozone_8h_max_24h`, `ozone_8h_max_24h_delta` e `horas_ruins_24h`.
 
 **Preparação congelada:** `SimpleImputer(median)` + `PowerTransformer(yeo-johnson, standardize=True)` dentro do `ColumnTransformer`, ajustado só no treino (`models/column_transformer_s4.joblib`).
+
+## Modelo final da Sprint 5 (v0.4)
+
+As features do modelo final são **exatamente as 25 congeladas na Sprint 4** (lista acima, `config/params.yaml` → `sprint4.features_congeladas`). Nenhuma coluna foi adicionada nem removida na Sprint 5.
+
+| Item | Valor |
+|---|---|
+| Modelo | `GaussianNB` no `ColumnTransformer` da Sprint 4 (mediana + Yeo-Johnson) |
+| Limiar | 0,20 (máximo F2 na validação temporal) |
+| Saída | `1` = ar inadequado (N3+) previsto para `t + 24 h`; `0` = Bom ou Moderado |
+| Artefato | `models/modelo_final_s5.joblib` (`FixedThresholdClassifier`) e `models/modelo_final_s5.json` |
+| Colunas que não entram no modelo | `timestamp` (identificador), `estado_atual` (só para o baseline de persistência), `qualidade_inadequada_24h` (alvo) |
+
+Model card: [`Model_Card.md`](Model_Card.md).
 
 ## Log de limpeza
 
