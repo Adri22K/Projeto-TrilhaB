@@ -15,13 +15,15 @@
 | `precipitation` | mm | Open-Meteo Historical Weather | Variável meteorológica bruta |
 | `wind_speed_10m` | km/h | Open-Meteo Historical Weather | Variável meteorológica bruta |
 
+**Natureza e resolução das fontes:** poluentes = Open-Meteo Air Quality (modelo CAMS Global, ≈ 45 km, passo nativo de 3 h entregue em série horária; **modelado**, não medição de estação). Clima = Open-Meteo Historical Weather (reanálise ERA5/ERA5-Land + ECMWF IFS 9 km; horária; **reanálise**). Período: 06/09/2024 00h a 06/09/2026 23h, 17.544 horas, fuso `America/Sao_Paulo` (UTC−3) nas duas fontes.
+
 ## Alvo
 
 | Variável | Tipo | Definição |
 |---|---|---|
 | `qualidade_inadequada_24h` | binária (`0`/`1`) | `1` quando, 24 horas após o instante das features, ao menos um poluente atinge a classe CETESB N3 — RUIM ou pior; `0` caso contrário |
 
-O estado N3 é calculado com os limites: PM10 (média de 24 h) > 100 µg/m³; PM2,5 (média de 24 h) > 50 µg/m³; SO2 (média de 24 h) > 50 µg/m³; O3 (média de 8 h) > 130 µg/m³; NO2 (1 h) > 240 µg/m³; CO (média de 8 h) > 11 ppm. Para o CO, usa-se o fator aproximado `ppm = µg/m³ × 0,0008727` a 25 °C e 1 atm.
+O estado N3 é calculado com os limites: PM10 (média de 24 h) > 100 µg/m³; PM2,5 (média de 24 h) > 50 µg/m³; SO2 (média de 24 h) > 40 µg/m³; O3 (média de 8 h) > 130 µg/m³; NO2 (1 h) > 240 µg/m³; CO (média de 8 h) > 11 ppm. Para o CO, usa-se o fator aproximado `ppm = µg/m³ × 0,0008727` a 25 °C e 1 atm.
 
 As colunas auxiliares de construção do alvo (`pm10_ruim`, `pm2_5_ruim`, `so2_ruim`, `ozone_ruim`, `no2_ruim`, `co_ruim`) são excluídas das features.
 

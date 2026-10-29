@@ -149,8 +149,7 @@ Scrum Master do Sprint = Nicolas Santos Silva
 Development Team = Adrielle, Victor, João Pedro e Samir
 
 - [x] Atualizações assíncronas semanais registradas (comentários de andamento nas issues da Sprint 4 no GitHub)
-
-**Link do board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
+- [x] Board refletindo o backlog, em andamento e concluído (uma issue por atividade abaixo, com responsável)
 
 **Atividades da Sprint 4 para o board:**
 
@@ -164,7 +163,7 @@ Development Team = Adrielle, Victor, João Pedro e Samir
 | 6 | Atualizar o dicionário para a v0.3 | Adrielle | `docs/Dicionario_de_Dados.md` |
 | 7 | Organizar o board, preparar a Sprint Review e consolidar este diário | Nicolas | este arquivo |
 
-**Link do board:** [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)
+**Link do board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 ## 6. Diário de bordo (retrospectiva individual)
 

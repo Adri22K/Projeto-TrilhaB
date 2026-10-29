@@ -109,8 +109,6 @@ Development Team = Adrielle, Victor, João Pedro e Samir
 5. Interpretar falsos negativos e preparar evidências para a Sprint 4.
 6. Atualizar o diário da Sprint e organizar os artefatos no repositório.
 
-**Link do board:** [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)
-
 **Link do board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 ## 5. Diário de bordo (retrospectiva individual)
@@ -122,6 +120,27 @@ Development Team = Adrielle, Victor, João Pedro e Samir
 | Nicolas | Organizei as atividades da Sprint como Scrum Master e acompanhei a consistência entre o planejamento, o board e o diário | Garantir que a Sprint 3 respeitasse o mesmo split e as definições estabelecidas na Sprint 2 | Manter o acompanhamento das tarefas e registrar com mais frequência as atualizações do grupo |
 | Samir | Auxiliei na análise dos erros dos modelos e na interpretação dos resultados relacionados aos poluentes | Relacionar os falsos positivos e falsos negativos ao comportamento temporal das variáveis | Aprofundar a análise dos horários de erro para apoiar a criação de novas features na Sprint 4 |
 | João Pedro | Auxiliei na preparação da modelagem, validação do Pipeline, controle de vazamento temporal e execução dos baselines | Implementar corretamente a persistência temporal e tratar a fronteira de 24 horas entre treino e teste | Manter as validações temporais e evoluir as features sem alterar o conjunto de teste definido na Sprint 2 |
+
+---
+
+## 6. Correções do feedback da Sprint 1
+
+Em resposta à correção da Sprint 1 (nota 1,1/4,0), o grupo preencheu o `Guia_Alunos_APIs_Trilhas_B_C` para a Trilha B: [`notebooks/00_guia_apis_trilhaB.ipynb`](../../notebooks/00_guia_apis_trilhaB.ipynb), executado no Colab com as saídas salvas.
+
+| Ponto da correção | O que foi feito |
+|---|---|
+| Evento genérico; sem classe positiva, horizonte e custo do FN | Seção 1 do guia e RFC v0.3 |
+| APIs sem documentação, unidades e justificativa | Seções 2 e 7 do guia (links, endpoints, parâmetros, resolução, limitações, erros) |
+| Parâmetros hard-coded; sem `timeout`/`raise_for_status`/`try-except` | `config` único e função `requisitar` |
+| Resposta não inspecionada; sem JSON bruto | Inspeção de status, `Content-Type`, URL, chaves e unidades; JSON salvo antes de transformar |
+| Uma fonte só; sem `merge` | Ar + clima integrados com `how="inner"` e `validate="one_to_one"` (17.544 linhas, nenhuma descartada) |
+| Qualidade dos dados e alvo ausentes | Partes 4 e 5 do guia, com teste automático de vazamento |
+
+Outras correções: limiar de SO₂ corrigido para 40 µg/m³ (faixa N3 da CETESB; os rótulos não mudam, pois a média de 24 h de SO₂ não passa de ~25 µg/m³); RFC atualizado para v0.3; dicionário com a natureza e a resolução das fontes; RGM corrigido.
+
+**Reprodutibilidade:** 
+
+A coleta ao vivo no Colab devolveu os mesmos dados do repositório (1.960 positivos em 14.040 horas no treino; 299 em 3.480 no teste), e a reexecução dos notebooks 01 a 03 regravou `data/interim`, `data/processed` e as métricas de `reports/sprint3` sem nenhuma diferença.
 
 ---
 
