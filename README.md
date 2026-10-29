@@ -21,7 +21,7 @@ Neste material, **Pipeline CD** = coleta e integração do bruto (Sprint 1). Nã
 
 `SprintN_Template_Correcao.md` é do corretor.
 
-Não há Sprint 6 neste projeto. Dashboard, se existir na mostra, é extra.
+Não há Sprint 6 neste projeto. O dashboard da Mostra é uma camada demonstrativa complementar e deve apenas consumir os artefatos finais da Sprint 5; ele não redefine split, features, limiar ou modelo.
 
 ---
 
@@ -72,7 +72,7 @@ Regras que um engenheiro de ML exigiria neste projeto. Não são MLOps: são o m
 4. **Seleção de atributos só no treino.** Correlação, importância ou filtro calculados no teste (ou no dataset inteiro) vazam. A Sprint 4 escolhe features no treino e aplica a lista ao teste.
 5. **Limiar não se otimiza no teste.** Recortar o **final do treino** como validação temporal (ou `TimeSeriesSplit` só dentro do treino), escolher o ponto de operação pelo custo de FN **nessa validação**, congelar o limiar e **medir o teste uma vez**. Olhar 0,3 / 0,5 / 0,7 no teste e ficar com o melhor é vazar o teste.
 6. **Desbalanceamento: medir e tratar com método adequado.** Dummy `most_frequent` é piso de **acurácia**, não de recall na classe rara. `class_weight="balanced"` (ou equivalente) é lícito. SMOTE / oversampling aleatório em série temporal **não** — inventa instantes que não existiram.
-7. **Se o baseline ganhar, o baseline é o resultado.** Persistência ou Dummy no pipeline final com recall/F1 iguais ou melhores que RF/XGBoost não é falha de entrega: é o modelo a ser escolhido. Complexidade extra precisa de ganho no teste, no limiar congelado.
+7. **Baseline participa da mesma regra de seleção.** Persistência e Dummy são referências válidas e podem ser escolhidos se vencerem o critério definido **na validação temporal**. O teste é usado somente para medir o desempenho final do vencedor e nunca para trocar o modelo depois da seleção.
 8. **Métrica com N pequeno se reporta em contagem.** Trilha C (e testes curtos na B): escrever “6 FN em 11 eventos” além de “recall 0,55”. Percentual sozinho mente quando o denominador é dezena.
 9. **Caderno de experimentos.** Uma tabela: modelo, conjunto de features (S2 ou S4), `random_state`, limiar, recall/precisão/F1 na **validação** e no **teste**. Sem isso não dá para saber o que foi tentado.
 10. **Mesmas regras na coleta nova.** Ampliar período na Sprint 3 implica reaplicar o log de limpeza da Sprint 2 e o critério de split — não um tratamento “de emergência” diferente.
@@ -209,7 +209,7 @@ Guia de investigação das APIs (Sprint 1, executado no Colab): `notebooks/00_gu
 
 Unidade de análise: uma hora em São Paulo, com qualidade do ar e clima integrados pelo timestamp.
 N após o merge: 17.544 linhas e 10 colunas.
-Split: treino de 06/09/2024 00:00 a 13/04/2026 23:00 (14.040 linhas) e teste de 14/04/2026 00:00 a 06/09/2026 23:00 (3.504 linhas).
+Split bruto da Sprint 2: treino de 06/09/2024 00:00 a 13/04/2026 23:00 (14.040 linhas) e teste de 14/04/2026 00:00 a 06/09/2026 23:00 (3.504 linhas). Após exigir alvo e features válidas, os arquivos de modelagem ficam com 14.016 linhas de treino e 3.480 de teste. Nas Sprints 3–5, a purga temporal de 24 h na fronteira do corte reduz o treino efetivamente usado para 13.992 linhas; o teste final permanece com 3.480 linhas e 299 casos positivos.
 Dicionário: `docs/Dicionario_de_Dados.md`
 
 ## Modelo
@@ -218,13 +218,13 @@ Baseline (Sprint 3, teste medido uma vez, sem ajuste de limiar): persistência t
 Sprint 4 (features novas + pipeline congelado, mesmo split): Naive Bayes subiu de recall 0,40 para 0,63 e de F1 0,33 para 0,47 (FN 180 → 112). Persistência e Dummy não mudam (regra fixa e classe majoritária). Pipeline congelado: 25 features, mediana + Yeo-Johnson, em `models/column_transformer_s4.joblib`.
 Modelo final (Sprint 5): **Gaussian Naive Bayes** no pipeline congelado da Sprint 4 (25 features, mediana + Yeo-Johnson), em `models/modelo_final_s5.joblib`. Foram comparados 7 modelos no mesmo teste: Dummy, persistência, NB, Regressão Logística, Decision Tree, Random Forest e HistGradientBoosting. NB e Regressão Logística empataram na validação (F2 de 0,740 e 0,744), e a regra registrada antes do teste escolheu o mais simples.
 Limiar (escolhido na validação) e por quê: **0,20**, o máximo F2 nas 3 janelas de validação temporal dentro do treino. O F2 dá ao recall o dobro do peso, porque o falso negativo expõe o atleta ao ar ruim, enquanto o falso positivo só troca o horário do treino.
-Métrica principal na classe positiva (teste, uma vez): **recall 0,682** (204 de 299 horas ruins detectadas), precisão 0,310, F2 0,550, **95 FN** e 453 FP. Persistência: recall 0,485, 154 FN. Model card: `docs/Model_Card.md`.
+Métrica principal na classe positiva (teste, uma vez): **recall 0,682** (204 de 299 horas ruins detectadas), precisão 0,311, F2 0,550, **95 FN** e 453 FP. Persistência: recall 0,485, 154 FN. Model card: `docs/Model_Card.md`.
 
 ## Documentação
 
 - RFC: `docs/RFC.md`
 - Sprints: `docs/sprints/`
-- Model card: no diário da Sprint 5
+- Model card: `docs/Model_Card.md`
 ```
 
 ---
@@ -232,22 +232,22 @@ Métrica principal na classe positiva (teste, uma vez): **recall 0,682** (204 de
 ## 6. Checklist antes de chamar o modelo de pronto
 
 <img src="https://img.shields.io/badge/feito-008000?style=flat-square" /> RFC e dicionário batem com o notebook (mesmo alvo, mesmo horizonte).
-- [ ] Duas fontes integradas com `how`/`validate` conscientes.
-- [ ] Inspeção de qualidade **antes** da correção (Sprint 2); limpeza com log e `data/interim`; `data/raw` da Sprint 1 intocado.
-- [ ] EDA feita na tabela tratada, não no bruto.
-- [ ] Desbalanceamento com porcentagem real **do treino**.
-- [ ] Nenhuma feature usa informação posterior ao instante de previsão; IDs/timestamps não vão como número.
-- [ ] Colunas do alvo estão na seção de exclusão do dicionário.
-- [ ] Split temporal (B) ou por safra (C); teste = período mais recente.
-- [ ] Um `Pipeline` sklearn (`ColumnTransformer` + classificador); `fit` só no treino; artefato = `joblib` desse objeto.
-- [ ] Dummy e persistência como piso; se ganharem no teste, **eles** são o modelo final.
-- [ ] Limiar escolhido na **validação** temporal (fim do treino); teste medido **uma vez**.
-- [ ] Caderno de experimentos (modelo, features, seed, limiar, val. e teste).
-- [ ] Matriz de confusão com FN/FP em **contagem**; erros concretos (datas ou município/safra).
-- [ ] Sem SMOTE em série/safra; `class_weight` ok; acurácia não escolhe o modelo.
-- [ ] Trilha C: N declarado; complexidade compatível.
-- [ ] `requirements.txt` e `config/` permitem reexecutar a ingestão.
-- [ ] Model card mínimo da Sprint 5 preenchido.
+- [x] Duas fontes integradas com `how`/`validate` conscientes.
+- [x] Inspeção de qualidade **antes** da correção (Sprint 2); limpeza com log e `data/interim`; `data/raw` da Sprint 1 intocado.
+- [x] EDA feita na tabela tratada, não no bruto.
+- [x] Desbalanceamento com porcentagem real **do treino**.
+- [x] Nenhuma feature usa informação posterior ao instante de previsão; IDs/timestamps não vão como número.
+- [x] Colunas do alvo estão na seção de exclusão do dicionário.
+- [x] Split temporal da Trilha B; teste = período mais recente.
+- [x] Um `Pipeline` sklearn (`ColumnTransformer` + classificador); `fit` só no treino; artefato = `joblib` desse objeto.
+- [x] Dummy e persistência usados como piso e submetidos ao critério definido **na validação**; o teste não redefine o modelo final.
+- [x] Limiar escolhido na **validação** temporal (fim do treino); teste medido **uma vez**.
+- [x] Caderno de experimentos (modelo, features, seed, limiar, val. e teste).
+- [x] Matriz de confusão com FN/FP em **contagem** e análise de erros concretos por data/episódio.
+- [x] Sem SMOTE em série temporal; `class_weight` usado quando aplicável; acurácia não escolhe o modelo.
+- [x] Trilha C: não se aplica; este projeto é da Trilha B.
+- [x] `requirements.txt` e `config/` permitem reexecutar a ingestão.
+- [x] Model card mínimo da Sprint 5 preenchido em `docs/Model_Card.md`.
 
 ---
 

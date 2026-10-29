@@ -31,7 +31,7 @@
     "elevacao_solar_alvo"
   ],
   "normalizacao": "yeo_johnson",
-  "random_state": 42,
+  "random_state": null,
   "corte_split": "2026-04-14 00:00:00",
   "sklearn": "1.8.0"
 }

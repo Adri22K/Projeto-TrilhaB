@@ -56,11 +56,25 @@
     "HistGradientBoosting": 0.25
   },
   "f2_validacao": {
+    "Dummy": 0.0,
+    "Persistencia": 0.6055734190782422,
     "Naive Bayes": 0.7398141529664046,
     "Regressao Logistica": 0.7440902578796562,
     "Decision Tree": 0.7233414379993053,
     "Random Forest": 0.738615664845173,
     "HistGradientBoosting": 0.7072368421052632
+  },
+  "dummy_validacao": {
+    "precisao_c1": 0.0,
+    "recall_c1": 0.0,
+    "f1_c1": 0.0,
+    "f2_c1": 0.0,
+    "recall_c0": 1.0,
+    "acuracia": 0.8626760563380281,
+    "tn": 5880,
+    "fp": 0,
+    "fn": 936,
+    "tp": 0
   },
   "persistencia_validacao": {
     "precisao_c1": 0.6134636264929425,
@@ -74,8 +88,8 @@
     "fn": 371,
     "tp": 565
   },
+  "regra_selecao": "maior F2 na validacao temporal; empate <= 0.005 -> modelo mais simples",
   "selecionado_na_validacao": "Naive Bayes",
-  "persistencia_vence_no_teste": false,
   "modelo_final": "Naive Bayes",
   "limiar_final": 0.2,
   "versoes": {

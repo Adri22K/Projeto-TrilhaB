@@ -1,5 +1,5 @@
 ID,modelo,hiperparametros,features,limiar,recall_val,f2_val,recall_teste,precisao_teste,f1_teste,f2_teste,fn_teste,fp_teste,random_state
-E01,Dummy,most_frequent,"S4 (25, Yeo-Johnson)",padrao (predict),,,0.0,0.0,0.0,0.0,299,0,—
+E01,Dummy,most_frequent,"S4 (25, Yeo-Johnson)",padrao (predict),0.0,0.0,0.0,0.0,0.0,0.0,299,0,—
 E02,Persistencia,regra estado(t) -> t+24h,estado_atual,—,0.6036,0.6056,0.4849,0.4801,0.4825,0.484,154,157,—
 E03,Naive Bayes,padrao,"S4 (25, Yeo-Johnson)",padrao (predict),0.7895,0.714,0.6254,0.3785,0.4716,0.5533,112,307,—
 E04,Naive Bayes,padrao,"S4 (25, Yeo-Johnson)",0.20 (validação),0.8846,0.7398,0.6823,0.3105,0.4268,0.5505,95,453,—
