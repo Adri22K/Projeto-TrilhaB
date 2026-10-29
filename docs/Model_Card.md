@@ -23,7 +23,7 @@ Avisar corredores e ciclistas, com 24 h de antecedência, se a qualidade do ar e
 
 `FixedThresholdClassifier(Pipeline(ColumnTransformer[SimpleImputer(median) → PowerTransformer(yeo-johnson)] → GaussianNB()), threshold=0.20)`
 
-- **Seleção:** sete modelos no mesmo pipeline e no mesmo teste (Dummy, persistência, Naive Bayes, Regressão Logística, Decision Tree, Random Forest, HistGradientBoosting). Os hiperparâmetros foram escolhidos por AP e o limiar por máximo F2, ambos nas 3 janelas de validação temporal dentro do treino. Regra registrada antes do teste: maior F2 na validação, com empate (≤ 0,005) decidido pelo modelo mais simples. NB (0,740) e Regressão Logística (0,744) empataram, com o Random Forest logo atrás (0,739), e ficou o NB, o mais simples.
+- **Comparativo e seleção:** sete alternativas foram avaliadas com a mesma validação temporal e, depois de congelada a regra de escolha, medidas na mesma partição de teste: Dummy, persistência, Naive Bayes, Regressão Logística, Decision Tree, Random Forest e HistGradientBoosting. Dummy e os cinco classificadores usam as features/pipeline congelados da Sprint 4; a persistência usa sua regra temporal própria. Para os classificadores ajustáveis, os hiperparâmetros foram escolhidos por AP e o limiar por máximo F2 nas 3 janelas de validação dentro do treino. Regra registrada antes do teste: maior F2 na validação, com empate (≤ 0,005) decidido pelo modelo mais simples. NB (0,740) e Regressão Logística (0,744) empataram, com o Random Forest logo atrás (0,739), e ficou o NB, o mais simples.
 - **Limiar 0,20:** máximo F2 na validação. O F2 foi escolhido porque o falso negativo, que expõe o atleta, custa mais que o falso positivo, que só muda o horário (RFC).
 - **`random_state`:** não se aplica, porque o modelo é determinístico.
 
@@ -31,7 +31,7 @@ Avisar corredores e ciclistas, com 24 h de antecedência, se a qualidade do ar e
 
 | Modelo | Recall c1 | Precisão c1 | F1 c1 | F2 c1 | FN | FP |
 |---|---|---|---|---|---|---|
-| **NB, limiar 0,20 (final)** | **0,682** | 0,310 | 0,427 | 0,550 | **95** | 453 |
+| **NB, limiar 0,20 (final)** | **0,682** | 0,311 | 0,427 | 0,550 | **95** | 453 |
 | NB, `predict` padrão | 0,625 | 0,379 | 0,472 | 0,553 | 112 | 307 |
 | Persistência (piso) | 0,485 | 0,480 | 0,482 | 0,484 | 154 | 157 |
 | Dummy | 0,000 | 0,000 | 0,000 | 0,000 | 299 | 0 |
