@@ -1,0 +1,41 @@
+{
+  "normalizacao": "yeo_johnson",
+  "familias": [
+    "pm10",
+    "sulphur_dioxide",
+    "precipitation",
+    "wind_speed_10m",
+    "ozone_8h",
+    "temp_max",
+    "hora_ciclica",
+    "mes_ciclico",
+    "solar"
+  ],
+  "features": [
+    "pm10",
+    "pm10_lag_1h",
+    "pm10_lag_24h",
+    "pm10_media_24h",
+    "sulphur_dioxide",
+    "sulphur_dioxide_lag_1h",
+    "sulphur_dioxide_lag_24h",
+    "sulphur_dioxide_media_24h",
+    "precipitation",
+    "precipitation_lag_1h",
+    "precipitation_lag_24h",
+    "precipitation_media_24h",
+    "wind_speed_10m",
+    "wind_speed_10m_lag_1h",
+    "wind_speed_10m_lag_24h",
+    "wind_speed_10m_media_24h",
+    "ozone_media_8h",
+    "ozone_max_8h",
+    "temperature_max_24h",
+    "temperature_max_24h_delta",
+    "hora_sin",
+    "hora_cos",
+    "mes_sin",
+    "mes_cos",
+    "elevacao_solar_alvo"
+  ]
+}
