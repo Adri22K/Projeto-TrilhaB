@@ -176,12 +176,18 @@ def main() -> dict:
     curva_df = pd.DataFrame(curva)
     curva_df.round(4).to_csv(REPORT_DIR / "curva_limiar_validacao.csv", index=False)
 
-    # persistencia na validacao (sem limiar)
+    # baselines na validacao (predicoes fixas, sem ajuste pelo teste)
     y_pers, p_pers = [], []
-    for _, _, val in janelas(treino):
+    y_dummy, p_dummy = [], []
+    for _, fit, val in janelas(treino):
         y_pers.append(val[ALVO].to_numpy())
         p_pers.append(val["estado_atual"].astype(int).to_numpy())
+        dummy_val = s4.make_pipeline(features, DummyClassifier(strategy="most_frequent"), "yeo_johnson").fit(
+            fit[features], fit[ALVO])
+        y_dummy.append(val[ALVO].to_numpy())
+        p_dummy.append(dummy_val.predict(val[features]))
     val_persist = metricas(np.concatenate(y_pers), np.concatenate(p_pers))
+    val_dummy = metricas(np.concatenate(y_dummy), np.concatenate(p_dummy))
 
     fig, ax = plt.subplots(figsize=(10, 4.5))
     for nome in escolhidos:
@@ -196,11 +202,17 @@ def main() -> dict:
     fig.savefig(REPORT_DIR / "curva_limiar_validacao.png", dpi=150)
     plt.close(fig)
 
-    # 3) Regra de selecao (registrada antes do teste): maior F2 na validacao; empate -> mais simples
+    # 3) Regra de selecao (registrada antes do teste): maior F2 na validacao; empate -> mais simples.
+    # Dummy e persistencia entram como baselines fixos na mesma comparacao de validacao.
     ordem = list(CANDIDATOS)
-    f2_val = {n: limiares[n]["val"]["f2_c1"] for n in ordem}
+    ordem_selecao = ["Dummy", "Persistencia", *ordem]
+    f2_val = {
+        "Dummy": val_dummy["f2_c1"],
+        "Persistencia": val_persist["f2_c1"],
+        **{n: limiares[n]["val"]["f2_c1"] for n in ordem},
+    }
     topo = max(f2_val.values())
-    selecionado = next(n for n in ordem if f2_val[n] >= topo - TOLERANCIA_EMPATE)
+    selecionado = next(n for n in ordem_selecao if f2_val[n] >= topo - TOLERANCIA_EMPATE)
 
     # 4) Treino final no treino completo e teste UMA vez (limiar padrao e limiar congelado)
     X_tr, y_tr = treino[features], treino[ALVO].to_numpy()
@@ -221,7 +233,8 @@ def main() -> dict:
         return m
 
     dummy = s4.make_pipeline(features, DummyClassifier(strategy="most_frequent"), "yeo_johnson").fit(X_tr, y_tr)
-    registrar("Dummy", "baseline S4", "most_frequent", "padrao (predict)", dummy.predict(X_te))
+    registrar("Dummy", "baseline S4", "most_frequent", "padrao (predict)", dummy.predict(X_te),
+              val_info=val_dummy)
     persist = s3.pipeline_persistencia().fit(treino[["estado_atual"]], y_tr)
     registrar("Persistencia", "baseline S4", "regra estado(t) -> t+24h", "—",
               persist.predict(teste[["estado_atual"]]), val_info=val_persist)
@@ -252,41 +265,64 @@ def main() -> dict:
     if int(pers_rep["fn"]) != int(s4_ref.loc["Persistencia temporal", "fn"]):
         raise ValueError("Persistencia nao reproduz a Sprint 4")
 
-    # 5) Teste do modelo selecionado contra a persistencia (regra do template)
-    sel_row = comp[(comp.modelo == selecionado) & (comp.limiar != "padrao (predict)")].iloc[0]
-    persistencia_vence = (pers_rep["f2_c1"] > sel_row["f2_c1"]) and (pers_rep["fn"] <= sel_row["fn"])
-    modelo_final = "Persistencia" if persistencia_vence else selecionado
+    # 5) O teste apenas mede o vencedor congelado na validacao; nao troca o modelo final.
+    modelo_final = selecionado
 
     # matrizes do modelo final e da persistencia
     s3.REPORT_DIR = REPORT_DIR
-    t_final = limiares[selecionado]["limiar"]
-    for nome, chave, stem in [(selecionado, (selecionado, f"{t_final:.2f} (validação)"), "final_limiar"),
-                              (selecionado, (selecionado, "padrao (predict)"), "final_padrao"),
-                              ("Persistencia", ("Persistencia", "—"), "persistencia")]:
+    t_final = limiares[selecionado]["limiar"] if selecionado in CANDIDATOS else None
+    if selecionado in CANDIDATOS:
+        limiar_sel_txt = next(lim for nome, lim in previsoes if nome == selecionado and lim != "padrao (predict)")
+        matrizes = [
+            (selecionado, (selecionado, limiar_sel_txt), "final_limiar"),
+            (selecionado, (selecionado, "padrao (predict)"), "final_padrao"),
+        ]
+    else:
+        chave_baseline = next(chave for chave in previsoes if chave[0] == selecionado)
+        matrizes = [(selecionado, chave_baseline, "final_padrao")]
+    chave_persist = next(chave for chave in previsoes if chave[0] == "Persistencia")
+    if selecionado != "Persistencia":
+        matrizes.append(("Persistencia", chave_persist, "persistencia"))
+    for nome, chave, stem in matrizes:
         s3.salvar_grafico(confusion_matrix(y_te, previsoes[chave], labels=[0, 1]), f"{nome} ({chave[1]})", stem)
 
-    # 6) Artefato final: Pipeline inteiro + limiar
-    pipe_sel, prob_sel = finais[selecionado]
-    final = FixedThresholdClassifier(
-        s4.make_pipeline(features, clone(escolhidos[selecionado][1]), "yeo_johnson"),
-        threshold=t_final, response_method="predict_proba").fit(X_tr, y_tr)
-    if not np.array_equal(final.predict(X_te), (prob_sel >= t_final).astype(int)):
-        raise ValueError("Artefato final nao reproduz as previsoes avaliadas")
+    # 6) Artefato final: vencedor congelado na validacao; limiar apenas quando aplicavel
+    if selecionado in CANDIDATOS:
+        _, prob_sel = finais[selecionado]
+        final = FixedThresholdClassifier(
+            s4.make_pipeline(features, clone(escolhidos[selecionado][1]), "yeo_johnson"),
+            threshold=t_final, response_method="predict_proba").fit(X_tr, y_tr)
+        pred_final = final.predict(X_te)
+        prob_final = prob_sel
+        if not np.array_equal(pred_final, (prob_sel >= t_final).astype(int)):
+            raise ValueError("Artefato final nao reproduz as previsoes avaliadas")
+        meta = {"modelo": selecionado, "hiperparametros": escolhidos[selecionado][0]["hiperparametros"],
+                "limiar": t_final, "origem_limiar": "max F2 na validacao temporal (3 janelas dentro do treino)",
+                "features": features, "normalizacao": "yeo_johnson", "random_state": None,
+                "corte_split": str(CUTOFF), "sklearn": sklearn.__version__}
+    elif selecionado == "Persistencia":
+        final = persist
+        pred_final = final.predict(teste[["estado_atual"]])
+        prob_final = final.predict_proba(teste[["estado_atual"]])[:, 1]
+        meta = {"modelo": selecionado, "hiperparametros": "regra estado(t) -> t+24h", "limiar": None,
+                "origem_limiar": None, "features": ["estado_atual"], "normalizacao": None,
+                "random_state": None, "corte_split": str(CUTOFF), "sklearn": sklearn.__version__}
+    else:
+        final = dummy
+        pred_final = final.predict(X_te)
+        prob_final = final.predict_proba(X_te)[:, 1]
+        meta = {"modelo": selecionado, "hiperparametros": "most_frequent", "limiar": None,
+                "origem_limiar": None, "features": features, "normalizacao": "yeo_johnson",
+                "random_state": None, "corte_split": str(CUTOFF), "sklearn": sklearn.__version__}
     joblib.dump(final, MODEL_DIR / "modelo_final_s5.joblib")
-    meta = {"modelo": selecionado, "hiperparametros": escolhidos[selecionado][0]["hiperparametros"],
-            "limiar": t_final, "origem_limiar": "max F2 na validacao temporal (3 janelas dentro do treino)",
-            "features": features, "normalizacao": "yeo_johnson", "random_state": SEED,
-            "corte_split": str(CUTOFF), "sklearn": sklearn.__version__}
     (MODEL_DIR / "modelo_final_s5.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-
     # 7) Analise de erros do modelo final (episodios concretos)
     clean = pd.read_csv(INTERIM_FILE, parse_dates=["timestamp"]).set_index("timestamp")
     o3_8h = clean["ozone"].rolling(8, min_periods=8).mean()
     pm25_24h = clean["pm2_5"].rolling(24, min_periods=24).mean()
     pm10_24h = clean["pm10"].rolling(24, min_periods=24).mean()
-    pred_final = (prob_sel >= t_final).astype(int)
     err = teste[["timestamp", ALVO, "estado_atual", "ozone_media_8h", "temperature_max_24h"]].copy()
-    err["prob"] = prob_sel
+    err["prob"] = prob_final
     err["previsto"] = pred_final
     err["tipo"] = np.select([(err[ALVO] == 1) & (err.previsto == 0), (err[ALVO] == 0) & (err.previsto == 1)],
                             ["FN", "FP"], "acerto")
@@ -341,8 +377,9 @@ def main() -> dict:
         "teste_vazamento_instantes": vazamento, "beta": BETA,
         "hiperparametros_escolhidos": {n: escolhidos[n][0]["hiperparametros"] for n in ordem},
         "limiares_validacao": {n: limiares[n]["limiar"] for n in ordem},
-        "f2_validacao": f2_val, "persistencia_validacao": val_persist,
-        "selecionado_na_validacao": selecionado, "persistencia_vence_no_teste": bool(persistencia_vence),
+        "f2_validacao": f2_val, "dummy_validacao": val_dummy, "persistencia_validacao": val_persist,
+        "regra_selecao": "maior F2 na validacao temporal; empate <= 0.005 -> modelo mais simples",
+        "selecionado_na_validacao": selecionado,
         "modelo_final": modelo_final, "limiar_final": t_final,
         "versoes": {"sklearn": sklearn.__version__, "pandas": pd.__version__, "numpy": np.__version__},
     }
@@ -351,9 +388,12 @@ def main() -> dict:
 
     print("\n=== SPRINT 5 — comparativo, limiar e selecao ===")
     print(f"Treino {len(treino)} | teste {len(teste)} ({int(y_te.sum())} positivas) | {len(features)} features S4")
-    print("Validacao (F2 no limiar congelado):", {k: round(v, 3) for k, v in f2_val.items()})
+    print("Validacao (F2; baselines fixos e candidatos no limiar congelado):",
+          {k: round(v, 3) for k, v in f2_val.items()})
+    print(f"Dummy na validacao: F2 {val_dummy['f2_c1']:.3f}")
     print(f"Persistencia na validacao: F2 {val_persist['f2_c1']:.3f}")
-    print(f"Selecionado na validacao: {selecionado} (limiar {t_final:.2f}) | modelo final: {modelo_final}")
+    limiar_final_txt = f"{t_final:.2f}" if t_final is not None else "fixo"
+    print(f"Selecionado na validacao: {selecionado} (limiar {limiar_final_txt}) | modelo final: {modelo_final}")
     print(comp[["modelo", "limiar", "recall_c1", "precisao_c1", "f1_c1", "f2_c1", "fn", "fp"]].round(3).to_string())
     return resultado
 
