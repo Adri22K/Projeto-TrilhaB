@@ -46,3 +46,11 @@ python src/sprint4_features.py
 ```
 
 O comando cria `data/processed/treino_features_s4.csv` e `teste_features_s4.csv` (features da Sprint 2 + novas), salva o pipeline congelado em `models/` e grava erros, seleção, métricas e lift em `reports/sprint4/`. Não altera os arquivos das Sprints anteriores.
+
+## Reproduzir a Sprint 5
+
+```powershell
+python src/sprint5_modelos.py
+```
+
+O comando lê `data/processed/*_s4.csv` e `config/params.yaml`, compara 7 modelos no pipeline congelado, escolhe hiperparâmetros e limiar na validação temporal, mede o teste uma vez e grava `reports/sprint5/` e `models/modelo_final_s5.*`. Não altera `data/`.

@@ -1,0 +1,15 @@
+modelo,hiperparametros,ap_medio,ap_janela_1,ap_janela_2,ap_janela_3
+Naive Bayes,padrao,0.607,0.4345,0.6414,0.745
+Regressao Logistica,C=0.01,0.6224,0.45,0.6598,0.7573
+Regressao Logistica,C=0.1,0.622,0.4451,0.6596,0.7614
+Regressao Logistica,C=1.0,0.6207,0.4451,0.6571,0.7598
+Decision Tree,max_depth=4,0.5527,0.4393,0.5461,0.6726
+Decision Tree,max_depth=6,0.5486,0.4064,0.5751,0.6644
+Decision Tree,max_depth=8,0.5215,0.3442,0.5718,0.6485
+Random Forest,"max_depth=8, min_samples_leaf=20",0.6432,0.5108,0.6845,0.7344
+Random Forest,"max_depth=12, min_samples_leaf=8",0.6389,0.5056,0.6685,0.7427
+Random Forest,"max_depth=16, min_samples_leaf=20",0.6417,0.5075,0.6744,0.7431
+HistGradientBoosting,"learning_rate=0.05, max_depth=3",0.6101,0.4581,0.6682,0.7042
+HistGradientBoosting,"learning_rate=0.05, max_depth=4",0.6083,0.4456,0.6648,0.7144
+HistGradientBoosting,"learning_rate=0.1, max_depth=3",0.5967,0.4645,0.6324,0.6933
+HistGradientBoosting,"learning_rate=0.1, max_depth=4",0.5924,0.4711,0.6104,0.6957
