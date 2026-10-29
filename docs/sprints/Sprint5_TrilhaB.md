@@ -8,7 +8,7 @@
 **Repositório GitHub:** [Projeto-TrilhaB](https://github.com/Adri22K/Projeto-TrilhaB)  
 **Board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
-> Split da Sprint 2 e `ColumnTransformer` **congelado na Sprint 4**. No comparativo, Dummy, persistência e Naive Bayes são os da Sprint 4 (mesmo pipeline). Pode **reproduzir** esses números no notebook desta sprint; **não** colar métricas da Sprint 3 (features antigas). Classificadores novos treinam neste pipeline, na mesma partição de teste.
+> Split da Sprint 2 e `ColumnTransformer` **congelado na Sprint 4**. No comparativo, Dummy e Naive Bayes reproduzem o pipeline da Sprint 4; a persistência reproduz o baseline temporal `estado_atual(t) → t+24h`. Todos entram na mesma regra de seleção pela validação e são medidos na mesma partição de teste. Pode **reproduzir** esses números no notebook desta sprint; **não** colar métricas da Sprint 3 (features antigas). Classificadores novos treinam no pipeline congelado.
 
 ### Contrato desta sprint
 
@@ -86,7 +86,7 @@ O NB continua tratado como hipótese pedagógica: as features da mesma família 
 | E01 | Dummy (most_frequent) | S4 (25, Yeo-Johnson) | 0,50 (predict) | — | 0,000 | 0,000 | 0,000 | 0,000 | 299 | 0 |
 | E02 | Persistencia (regra estado(t) -> t+24h) | estado_atual | — | 0,604 | 0,485 | 0,480 | 0,482 | 0,484 | 154 | 157 |
 | E03 | Naive Bayes (padrao) | S4 (25, Yeo-Johnson) | 0,50 (predict) | 0,789 | 0,625 | 0,379 | 0,472 | 0,553 | 112 | 307 |
-| E04 | Naive Bayes (padrao) | S4 (25, Yeo-Johnson) | 0,20 | 0,885 | 0,682 | 0,310 | 0,427 | 0,550 | 95 | 453 |
+| E04 | Naive Bayes (padrao) | S4 (25, Yeo-Johnson) | 0,20 | 0,885 | 0,682 | 0,311 | 0,427 | 0,550 | 95 | 453 |
 | E05 | Regressao Logistica (C=0.01) | S4 (25, Yeo-Johnson) | 0,50 (predict) | 0,888 | 0,702 | 0,337 | 0,455 | 0,577 | 89 | 414 |
 | E06 | Regressao Logistica (C=0.01) | S4 (25, Yeo-Johnson) | 0,50 | 0,888 | 0,702 | 0,337 | 0,455 | 0,577 | 89 | 414 |
 | E07, rs=42 | Decision Tree (max_depth=4) | S4 (25, Yeo-Johnson) | 0,50 (predict) | 0,816 | 0,739 | 0,335 | 0,461 | 0,596 | 78 | 438 |
@@ -128,12 +128,13 @@ Tabela do Naive Bayes na validação:
 | Decision Tree (0,35) | 0,723 |
 | HistGradientBoosting (0,25) | 0,707 |
 | Persistência | 0,606 |
+| Dummy | 0,000 |
 
 NB e Regressão Logística empatam (diferença de 0,004, dentro da tolerância), e o Random Forest fica logo atrás (0,739). A regra escolhe o mais simples dos empatados: **Naive Bayes com limiar 0,20**.
 
 ## 4. Seleção do modelo, análise de erros e model card mínimo
 
-- [x] Modelo final selecionado com justificativa (métrica da classe positiva + limiar + complexidade). **Não** escolher por acurácia. Se Dummy ou persistência ganharem no teste, **eles são o modelo final**.
+- [x] Modelo final selecionado com justificativa (métrica da classe positiva + limiar + complexidade). **Não** escolher por acurácia nem pelo teste. Dummy e persistência participam da mesma seleção na validação e podem ser escolhidos se vencerem o critério pré-definido.
 - [x] Análise qualitativa de erros concretos (datas/episódios, não só “erra mais na positiva”)
 - [x] Model card mínimo preenchido abaixo
 - [x] `joblib` (ou equivalente) do **Pipeline inteiro** em `models/` (pré-processamento + classificador + limiar documentado)
@@ -143,8 +144,8 @@ NB e Regressão Logística empatam (diferença de 0,004, dentro da tolerância),
 
 **Gaussian Naive Bayes no pipeline da Sprint 4, com limiar 0,20.**
 
-- **Métrica da classe positiva:** ficou empatado em primeiro no F2 de validação (0,740 contra 0,744 da Regressão Logística) e foi escolhido pela regra de complexidade. No teste: **recall 0,682** (204 de 299 horas ruins detectadas), precisão 0,310, F1 0,427, F2 0,550, **95 FN** e 453 FP.
-- **Contra a persistência (piso real):** o NB detecta 59 horas ruins a mais (95 FN contra 154), com F2 de 0,550 contra 0,484. A persistência **não** vence, então não é o modelo final.
+- **Métrica da classe positiva:** ficou empatado em primeiro no F2 de validação (0,740 contra 0,744 da Regressão Logística) e foi escolhido pela regra de complexidade. No teste: **recall 0,682** (204 de 299 horas ruins detectadas), precisão 0,311, F1 0,427, F2 0,550, **95 FN** e 453 FP.
+- **Contra a persistência (piso real):** na validação, a persistência teve F2 de 0,606, abaixo do NB (0,740), e por isso não entrou no grupo de empate que definiu o vencedor. No teste final, o NB detectou 59 horas ruins a mais (95 FN contra 154), com F2 de 0,550 contra 0,484; esses números servem apenas para medir o desempenho após a seleção.
 - **Limiar:** 0,20 tira 17 FN em relação ao `predict` padrão (112 → 95), ao custo de 146 FP a mais. A troca é coerente com o custo do FN no RFC.
 - **Complexidade:** não tem hiperparâmetros, treina em menos de 1 s e é fácil de explicar na Mostra.
 - **Transparência sobre o teste:** no teste, a Decision Tree (F2 0,592; 72 FN), o Random Forest (0,578) e a Regressão Logística (0,577) ficaram acima do NB (0,550). **Não trocamos o modelo por isso:** escolher pelo teste seria usar o teste para seleção, o que o contrato proíbe. As diferenças (≈ 0,03–0,04 de F2) também estão dentro da variação entre janelas observada na validação (~0,15).
@@ -176,16 +177,16 @@ Os erros foram agrupados em episódios de horas consecutivas (`reports/sprint5/e
 | Split (treino / teste) | Temporal, corte em 14/04/2026. Treino: 06/09/2024–13/04/2026 (13.992 h após a purga de 24 h). Teste: 14/04–05/09/2026 (3.480 h; 299 positivas, 8,6 %). |
 | Features (link do dicionário) | 25 features congeladas na Sprint 4: [`docs/Dicionario_de_Dados.md`](../Dicionario_de_Dados.md) (v0.4). |
 | Algoritmo, hiperparâmetros, `random_state` e limiar (origem: validação) | `GaussianNB` (parâmetros padrão, determinístico) dentro de `Pipeline(ColumnTransformer[SimpleImputer(median) → PowerTransformer(yeo-johnson)] → GaussianNB)`, envolvido em `FixedThresholdClassifier` com **limiar 0,20**, escolhido por máximo F2 na validação temporal (3 janelas dentro do treino). Artefato: `models/modelo_final_s5.joblib`. |
-| Métrica principal no teste (classe positiva) | **Recall 0,682** (204/299); precisão 0,310; F1 0,427; F2 0,550; **95 FN**, 453 FP. Persistência: recall 0,485, 154 FN. |
+| Métrica principal no teste (classe positiva) | **Recall 0,682** (204/299); precisão 0,311; F1 0,427; F2 0,550; **95 FN**, 453 FP. Persistência: recall 0,485, 154 FN. |
 | O que o modelo **não** faz / limitações | Não mede a rua do atleta: os dados são **modelados** (CAMS, ≈ 45 km) e há um ponto para a cidade inteira. Erra a maioria dos **episódios de MP2,5 de inverno** (64 % dos FN). Erra inícios de episódio sem sinal no dia anterior. Gera muitos alarmes falsos (453 h no teste), em geral em dias Moderados. Suas probabilidades **não** são calibradas (o NB supõe independência). Na operação real, precisaria de previsão do tempo, e não de reanálise. Não substitui orientação médica nem os alertas oficiais da CETESB. |
 | Como reproduzir (`requirements.txt` + notebook/script) | `pip install -r requirements.txt` → `python src/sprint5_modelos.py` ou `notebooks/05_modelos.ipynb` (Restart → Run All). Usa `data/processed/*_s4.csv` e `config/params.yaml`. Model card completo: [`docs/Model_Card.md`](../Model_Card.md). |
 
 ## 5. Integração com Banco de Dados (opcional)
 
-- [ ] Ponto de integração avaliado com a disciplina de Banco de Dados (poluentes, clima e previsões)
-- [ ] Situação atual da integração (em andamento / não viabilizada / concluída)
+- [x] Necessidade de integração com Banco de Dados avaliada para poluentes, clima, previsões e apresentação do projeto
+- [x] Situação atual registrada: não viabilizada nesta entrega por não ser necessária ao escopo
 
-**Situação:** [A PREENCHER — opcional. Se não houve integração, escrever "não viabilizada nesta entrega" e o motivo.]
+**Situação:** não viabilizada nesta entrega. O projeto é acadêmico, será apresentado por meio de um dashboard demonstrativo e não terá continuidade operacional depois da Mostra. O volume atual é atendido pelos CSVs versionados/gerados pelo pipeline, que também facilitam a reprodução dos experimentos. O dashboard deve consumir os CSVs e os artefatos finais (`joblib`/JSON) diretamente. Um banco de dados só acrescentaria complexidade de infraestrutura sem benefício para o objetivo desta entrega.
 
 ## 6. Scrum e diário de bordo
 
@@ -198,7 +199,7 @@ Os erros foram agrupados em episódios de horas consecutivas (`reports/sprint5/e
 | Victor | Escrevi o artigo de divulgação sobre "inteligência atmosférica", que explica o problema da qualidade do ar para quem treina ao ar livre e o que o modelo entrega | Traduzir métricas como recall e falso negativo para uma linguagem que um atleta entenda | Revisar o artigo com os números finais (recall 0,68 e 95 FN) e os limites do modelo |
 | Nicolas | Como Scrum Master, organizei o board. Implementei o primeiro experimento com Decision Tree e Random Forest (`class_weight="balanced"`, limiar por F2 na validação), cujos hiperparâmetros e a ideia do F2 foram reaproveitados no comparativo final | O experimento inicial usava as features da Sprint 2 e comparava vários limiares no teste. Foi preciso refazê-lo no transformer congelado e com o limiar fixado na validação | Trabalhar sempre a partir da `main` atualizada e em branch com PR, para não sobrescrever correções |
 | Samir | Implementei o comparativo final (`src/sprint5_modelos.py` e notebook 05): 3 baselines reproduzidos da Sprint 4 e 4 modelos novos no pipeline congelado, busca de hiperparâmetros e limiar na validação temporal, regra de seleção fixada antes do teste, análise de erros por episódio, artefato `joblib` com o limiar e o model card | Resistir a trocar o modelo depois de ver que a Decision Tree foi melhor no teste; documentar por que isso seria vazamento | Na continuação, testar a família `pm2_5` e variáveis de previsão do tempo para os episódios de partículas |
-| João Pedro | [CONFIRMAR COM O JOÃO o que ele fez nesta sprint] | | |
+| João Pedro | Fiz a revisão geral da Sprint 5, conferindo o comparativo dos modelos, os limiares definidos na validação temporal, as métricas da classe positiva e a justificativa para a escolha do Gaussian Naive Bayes como modelo final. Também revisei as evidências da própria Sprint 5, identifiquei divergências entre resultados exploratórios e resultados oficiais, corrigi descrições e números que não estavam alinhados com a entrega final e conferi o registro das atividades e pendências desta Sprint | A principal dificuldade foi separar os resultados exploratórios dos resultados oficiais da Sprint 5 e garantir que métricas, limiares, modelo final e justificativas estivessem coerentes nas evidências da própria Sprint | Manter a revisão cruzada das evidências da Sprint 5 antes do encerramento e deixar suas pendências registradas de forma clara |
 
 ---
 
