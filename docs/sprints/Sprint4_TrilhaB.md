@@ -149,7 +149,8 @@ Scrum Master do Sprint = Nicolas Santos Silva
 Development Team = Adrielle, Victor, João Pedro e Samir
 
 - [x] Atualizações assíncronas semanais registradas (comentários de andamento nas issues da Sprint 4 no GitHub)
-- [x] Board refletindo o backlog, em andamento e concluído (uma issue por atividade abaixo, com responsável)
+
+**Link do board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 **Atividades da Sprint 4 para o board:**
 
