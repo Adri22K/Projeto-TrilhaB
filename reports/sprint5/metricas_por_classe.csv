@@ -1,0 +1,25 @@
+modelo,limiar,classe,precisao,recall,f1,suporte
+Dummy,padrao (predict),0,0.9141,1.0,0.9551,3181
+Dummy,padrao (predict),1,0.0,0.0,0.0,299
+Persistencia,—,0,0.9515,0.9506,0.9511,3181
+Persistencia,—,1,0.4801,0.4849,0.4825,299
+Naive Bayes,padrao (predict),0,0.9625,0.9035,0.9321,3181
+Naive Bayes,padrao (predict),1,0.3785,0.6254,0.4716,299
+Naive Bayes,0.20 (validação),0,0.9663,0.8576,0.9087,3181
+Naive Bayes,0.20 (validação),1,0.3105,0.6823,0.4268,299
+Regressao Logistica,padrao (predict),0,0.9688,0.8699,0.9167,3181
+Regressao Logistica,padrao (predict),1,0.3365,0.7023,0.455,299
+Regressao Logistica,0.50 (validação),0,0.9688,0.8699,0.9167,3181
+Regressao Logistica,0.50 (validação),1,0.3365,0.7023,0.455,299
+Decision Tree,padrao (predict),0,0.9724,0.8623,0.914,3181
+Decision Tree,padrao (predict),1,0.3354,0.7391,0.4614,299
+Decision Tree,0.35 (validação),0,0.9739,0.8444,0.9045,3181
+Decision Tree,0.35 (validação),1,0.3144,0.7592,0.4447,299
+Random Forest,padrao (predict),0,0.9636,0.9157,0.9391,3181
+Random Forest,padrao (predict),1,0.4136,0.6321,0.5,299
+Random Forest,0.40 (validação),0,0.9661,0.8969,0.9302,3181
+Random Forest,0.40 (validação),1,0.3776,0.6656,0.4818,299
+HistGradientBoosting,padrao (predict),0,0.9557,0.9299,0.9426,3181
+HistGradientBoosting,padrao (predict),1,0.4208,0.5418,0.4737,299
+HistGradientBoosting,0.25 (validação),0,0.9664,0.8416,0.8997,3181
+HistGradientBoosting,0.25 (validação),1,0.2901,0.689,0.4083,299
