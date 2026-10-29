@@ -168,9 +168,7 @@ Development Team = Adrielle, Victor, João e Samir
 2. Como praticante de exercícios ao ar livre, quero visualizar quais horários apresentam melhores condições de qualidade do ar, para planejar meu treino ao longo do dia.
 3. Como usuário, quero receber um alerta quando houver previsão de qualidade do ar inadequada, para considerar alterar o horário da minha atividade ao ar livre.
 
-**Link do board:[BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)**
-
-**Board (Projects):** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
+**Link do board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 
 ## 6. Diário de bordo (retrospectiva individual)
@@ -190,7 +188,7 @@ Development Team = Adrielle, Victor, João e Samir
 
 - Link de commits desta Sprint: [SPRINT #1](https://github.com/Adri22K/Projeto-TrilhaB/commits/main/)
 
-- Link do board atualizado: [BOARD](https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-54815479701)
+- Link do board atualizado: [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 - Link do notebook / `config` / `data/raw`: [NOTBOOK](https://github.com/Adri22K/Projeto-TrilhaB/tree/6007a278c88fa1a6ae0ff768201da7b66456c039/config)
 

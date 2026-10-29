@@ -132,9 +132,7 @@ Só NA que a limpeza de domínio não resolveu. Parâmetros saem **somente do tr
 - [x] Atualizações semanais no board
 - [x] Board refletindo o estado real
 
-**Link do board:** [BOARD][(https://github.com/Adri22K/Projeto-TrilhaB/issues/2#issue-5481547970)](https://github.com/Adri22K/Projeto-TrilhaB/issues/4#issue-5796278509)
-
-**Board (Projects):** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
+**Link do board:** [Projeto Trilha B — Sprints](https://github.com/users/SamirAbdulKhalek/projects/2)
 
 ## 8. Diário de bordo (retrospectiva individual)
 
