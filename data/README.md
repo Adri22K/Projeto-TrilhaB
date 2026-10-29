@@ -30,3 +30,19 @@ O comando cria:
 - dados limpos e splits em `data/interim/`;
 - matrizes com features em `data/processed/`;
 - estatísticas, logs e gráficos em `reports/sprint2/`.
+
+## Reproduzir a Sprint 3
+
+```powershell
+python src/sprint3_baselines.py
+```
+
+O comando lê `data/processed/` e `data/interim/integrado_limpo.csv` e grava métricas, matrizes de confusão e erros em `reports/sprint3/`. Não altera `data/`.
+
+## Reproduzir a Sprint 4
+
+```powershell
+python src/sprint4_features.py
+```
+
+O comando cria `data/processed/treino_features_s4.csv` e `teste_features_s4.csv` (features da Sprint 2 + novas), salva o pipeline congelado em `models/` e grava erros, seleção, métricas e lift em `reports/sprint4/`. Não altera os arquivos das Sprints anteriores.
