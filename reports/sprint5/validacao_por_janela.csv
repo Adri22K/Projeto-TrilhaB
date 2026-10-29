@@ -1,0 +1,16 @@
+modelo,janela_inicio,limiar,recall_c1,f2_c1,fn,fp
+Naive Bayes,2025-07-01,0.2,0.8348,0.6404,38,387
+Naive Bayes,2025-10-01,0.2,0.883,0.7563,44,359
+Naive Bayes,2026-01-01,0.2,0.9212,0.7992,26,278
+Regressao Logistica,2025-07-01,0.5,0.8261,0.6372,40,381
+Regressao Logistica,2025-10-01,0.5,0.9096,0.7755,34,359
+Regressao Logistica,2026-01-01,0.5,0.9061,0.7918,31,269
+Decision Tree,2025-07-01,0.35,0.8174,0.6425,42,355
+Decision Tree,2025-10-01,0.35,0.8697,0.7299,49,409
+Decision Tree,2026-01-01,0.35,0.9636,0.7737,12,417
+Random Forest,2025-07-01,0.4,0.7696,0.6367,53,293
+Random Forest,2025-10-01,0.4,0.875,0.7546,47,347
+Random Forest,2026-01-01,0.4,0.9242,0.7943,25,295
+HistGradientBoosting,2025-07-01,0.25,0.4826,0.4727,119,143
+HistGradientBoosting,2025-10-01,0.25,0.9122,0.7656,33,393
+HistGradientBoosting,2026-01-01,0.25,0.9697,0.7775,10,418
