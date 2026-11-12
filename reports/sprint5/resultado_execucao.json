@@ -46,14 +46,16 @@
     "Regressao Logistica": "C=0.01",
     "Decision Tree": "max_depth=4",
     "Random Forest": "max_depth=8, min_samples_leaf=20",
-    "HistGradientBoosting": "learning_rate=0.05, max_depth=3"
+    "HistGradientBoosting": "learning_rate=0.05, max_depth=3",
+    "XGBoost": "learning_rate=0.03, max_depth=4"
   },
   "limiares_validacao": {
     "Naive Bayes": 0.2,
     "Regressao Logistica": 0.5,
     "Decision Tree": 0.35,
     "Random Forest": 0.4,
-    "HistGradientBoosting": 0.25
+    "HistGradientBoosting": 0.25,
+    "XGBoost": 0.35
   },
   "f2_validacao": {
     "Dummy": 0.0,
@@ -62,7 +64,8 @@
     "Regressao Logistica": 0.7440902578796562,
     "Decision Tree": 0.7233414379993053,
     "Random Forest": 0.738615664845173,
-    "HistGradientBoosting": 0.7072368421052632
+    "HistGradientBoosting": 0.7072368421052632,
+    "XGBoost": 0.732412763575294
   },
   "dummy_validacao": {
     "precisao_c1": 0.0,

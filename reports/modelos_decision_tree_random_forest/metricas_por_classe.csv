@@ -1,11 +1,13 @@
 algoritmo,configuracao,limiar,classe,precisao,recall,f1,suporte
-Decision Tree,Decision Tree (Limiar Padrao 0.50),0.5,0,0.9615780445969125,0.881169443571204,0.9196194225721784,3181
-Decision Tree,Decision Tree (Limiar Padrao 0.50),0.5,1,0.3309734513274336,0.6254180602006689,0.43287037037037035,299
-Decision Tree,Decision Tree (Limiar F2 0.65),0.65,0,0.9523489932885906,0.8921722728701666,0.9212790131472164,3181
-Decision Tree,Decision Tree (Limiar F2 0.65),0.65,1,0.314,0.5250836120401338,0.392991239048811,299
-Random Forest,Random Forest (Limiar Padrao 0.50),0.5,0,0.9449626865671642,0.9553599497013517,0.9501328747850555,3181
-Random Forest,Random Forest (Limiar Padrao 0.50),0.5,1,0.4621212121212121,0.4080267558528428,0.433392539964476,299
-Random Forest,Random Forest (Limiar F1 0.57),0.5700000000000001,0,0.9393292682926829,0.9685633448601069,0.9537223340040242,3181
-Random Forest,Random Forest (Limiar F1 0.57),0.5700000000000001,1,0.5,0.33444816053511706,0.40080160320641284,299
-Random Forest,Random Forest (Limiar F2 0.35),0.35,0,0.956266318537859,0.9210939955988683,0.9383506805444356,3181
-Random Forest,Random Forest (Limiar F2 0.35),0.35,1,0.39663461538461536,0.5518394648829431,0.46153846153846156,299
+Decision Tree,Decision Tree (Limiar Padrao 0.50),0.5,0,0.9724,0.8623,0.914,3181
+Decision Tree,Decision Tree (Limiar Padrao 0.50),0.5,1,0.3354,0.7391,0.4614,299
+Decision Tree,Decision Tree (Limiar F2 0.35),0.35,0,0.9739,0.8444,0.9045,3181
+Decision Tree,Decision Tree (Limiar F2 0.35),0.35,1,0.3144,0.7592,0.4447,299
+Random Forest,Random Forest (Limiar Padrao 0.50),0.5,0,0.9636,0.9157,0.9391,3181
+Random Forest,Random Forest (Limiar Padrao 0.50),0.5,1,0.4136,0.6321,0.5,299
+Random Forest,Random Forest (Limiar F2 0.40),0.4,0,0.9661,0.8969,0.9302,3181
+Random Forest,Random Forest (Limiar F2 0.40),0.4,1,0.3776,0.6656,0.4818,299
+XGBoost,XGBoost (Limiar Padrao 0.50),0.5,0,0.9591,0.9211,0.9397,3181
+XGBoost,XGBoost (Limiar Padrao 0.50),0.5,1,0.4094,0.5819,0.4807,299
+XGBoost,XGBoost (Limiar F2 0.25),0.25,0,0.9718,0.8346,0.898,3181
+XGBoost,XGBoost (Limiar F2 0.25),0.25,1,0.2968,0.7425,0.4241,299

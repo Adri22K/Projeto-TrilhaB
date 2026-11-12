@@ -23,3 +23,7 @@ HistGradientBoosting,padrao (predict),0,0.9557,0.9299,0.9426,3181
 HistGradientBoosting,padrao (predict),1,0.4208,0.5418,0.4737,299
 HistGradientBoosting,0.25 (validação),0,0.9664,0.8416,0.8997,3181
 HistGradientBoosting,0.25 (validação),1,0.2901,0.689,0.4083,299
+XGBoost,padrao (predict),0,0.9571,0.9252,0.9409,3181
+XGBoost,padrao (predict),1,0.4123,0.5585,0.4744,299
+XGBoost,0.35 (validação),0,0.9621,0.8859,0.9224,3181
+XGBoost,0.35 (validação),1,0.3412,0.6288,0.4424,299

@@ -13,3 +13,7 @@ HistGradientBoosting,"learning_rate=0.05, max_depth=3",0.6101,0.4581,0.6682,0.70
 HistGradientBoosting,"learning_rate=0.05, max_depth=4",0.6083,0.4456,0.6648,0.7144
 HistGradientBoosting,"learning_rate=0.1, max_depth=3",0.5967,0.4645,0.6324,0.6933
 HistGradientBoosting,"learning_rate=0.1, max_depth=4",0.5924,0.4711,0.6104,0.6957
+XGBoost,"learning_rate=0.03, max_depth=3",0.6265,0.4992,0.6581,0.7223
+XGBoost,"learning_rate=0.03, max_depth=4",0.6304,0.5071,0.677,0.7071
+XGBoost,"learning_rate=0.05, max_depth=3",0.6252,0.5058,0.672,0.6978
+XGBoost,"learning_rate=0.05, max_depth=4",0.6206,0.4946,0.6894,0.6778
