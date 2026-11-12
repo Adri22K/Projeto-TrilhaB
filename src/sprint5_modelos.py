@@ -38,6 +38,7 @@ from sklearn.metrics import (average_precision_score, confusion_matrix, fbeta_sc
 from sklearn.model_selection import FixedThresholdClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
+import xgboost as xgb
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -88,6 +89,15 @@ CANDIDATOS = {
         "grade": {f"learning_rate={lr}, max_depth={d}": HistGradientBoostingClassifier(
             learning_rate=lr, max_depth=d, max_iter=300, class_weight="balanced", random_state=SEED)
             for lr in (0.05, 0.1) for d in (3, 4)},
+    },
+    "XGBoost": {
+        "familia": "novo",
+        "grade": {
+            f"learning_rate={lr}, max_depth={d}": xgb.XGBClassifier(
+                n_estimators=200, learning_rate=lr, max_depth=d, scale_pos_weight=6.19,
+                subsample=0.8, colsample_bytree=0.8, random_state=SEED, eval_metric="logloss", n_jobs=-1)
+            for lr in (0.03, 0.05) for d in (3, 4)
+        },
     },
 }
 
