@@ -901,27 +901,45 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         render_hero_header(
             titulo="⚡ Orquestrador do Pipeline de Ponta a Ponta",
             subtitulo="Dispare a execução completa e automatizada: coleta, tratamento, modelagem e comparação contra baselines",
-            badges=["🔄 Pipeline Automatizado", "🧼 Limpeza e Purga 24h", "🧠 Treinamento e Calibração", "📊 Geração de Relatórios"]
-    )
+            badges=[
+                "🔄 Pipeline Automatizado",
+                "🧼 Limpeza e Purga 24h",
+                "🧠 Treinamento e Calibração",
+                "📊 Geração de Relatórios"
+            ]
+        )
 
-    st.markdown("""
-    <div class="metric-card" style="border-left: 4px solid #3b82f6; margin-bottom: 20px;">
-        <h4 style="margin-top: 0; color: #1e3a8a;">Fluxo de Execução Sequencial</h4>
-        <ol style="margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
-            <li><strong>Coleta e Integração:</strong> Consulta ou verifica o repositório bruto das APIs públicas da Open-Meteo.</li>
-            <li><strong>Limpeza e Split Temporal:</strong> Trata sentinelas, padroniza unidades e aplica purga temporal estrita de 24 horas.</li>
-            <li><strong>Modelagem e Calibração:</strong> Treina Decision Tree, Random Forest e XGBoost com <code>ColumnTransformer</code> (Yeo-Johnson) e calibra limiares ótimos por $F_2$.</li>
-            <li><strong>Comparação e Auditoria:</strong> Avalia contra a Persistência Temporal e regera todos os relatórios e métricas.</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="metric-card" style="border-left: 4px solid #3b82f6; margin-bottom: 20px;">
+            <h4 style="margin-top: 0; color: #1e3a8a;">Fluxo de Execução Sequencial</h4>
+            <ol style="margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
+                <li><strong>Coleta e Integração:</strong> Consulta ou verifica o repositório bruto das APIs públicas da Open-Meteo.</li>
+                <li><strong>Limpeza e Split Temporal:</strong> Trata sentinelas, padroniza unidades e aplica purga temporal estrita de 24 horas.</li>
+                <li><strong>Modelagem e Calibração:</strong> Treina Decision Tree, Random Forest e XGBoost com ColumnTransformer e calibra limiares por F2.</li>
+                <li><strong>Comparação e Auditoria:</strong> Avalia contra a Persistência Temporal e gera relatórios e métricas.</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("🚀 Executar Pipeline Completo Agora", type="primary", use_container_width=True):
-        import pipeline_completo
-        with st.spinner("Executando pipeline completo... Isso pode levar de 30 a 60 segundos."):
-            res = pipeline_completo.executar_pipeline_completo(forcar_recoleta=False)
-            st.success(f"Pipeline executado com sucesso em {res['tempo_execucao_s']:.2f} segundos!")
-            st.dataframe(pd.DataFrame(res["comparativo"]), use_container_width=True)
+        if st.button(
+            "🚀 Executar Pipeline Completo Agora",
+            type="primary",
+            use_container_width=True
+        ):
+            import pipeline_completo
 
+            with st.spinner("Executando pipeline completo... Isso pode levar de 30 a 60 segundos."):
+                res = pipeline_completo.executar_pipeline_completo(
+                    forcar_recoleta=False
+                )
+
+                st.success(
+                    f"Pipeline executado com sucesso em {res['tempo_execucao_s']:.2f} segundos!"
+                )
+
+                st.dataframe(
+                    pd.DataFrame(res["comparativo"]),
+                    use_container_width=True
+                )
 
 
