@@ -59,32 +59,6 @@ FROZEN_FEATURES = [
     "elevacao_solar_alvo",
 ]
 
-# Features dos pipelines Decision Tree / Random Forest treinados com 39 atributos.
-# Mantemos também FROZEN_FEATURES (25 atributos) para compatibilidade com artefatos Sprint 4/5.
-BASE_FEATURES_39 = [
-    "pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide",
-    "sulphur_dioxide", "ozone", "temperature_2m",
-    "precipitation", "wind_speed_10m",
-]
-FEATURES_39 = (
-    BASE_FEATURES_39
-    + ["hora", "dia_semana", "mes"]
-    + [
-        f"{col}_{sufixo}"
-        for col in BASE_FEATURES_39
-        for sufixo in ("lag_1h", "lag_24h", "media_24h")
-    ]
-)
-
-
-def _features_esperadas(pipeline: Any, df: pd.DataFrame) -> list[str]:
-    """Seleciona a lista de atributos compatível com o pipeline carregado."""
-    nomes = getattr(pipeline, "feature_names_in_", None)
-    if nomes is not None:
-        return list(nomes)
-    if all(col in df.columns for col in FROZEN_FEATURES):
-        return FROZEN_FEATURES
-    return FEATURES_39
 THRESHOLDS_MODELOS = {
     "Decision Tree": 0.35,
     "Random Forest": 0.40,
@@ -360,20 +334,6 @@ def extrair_features_e_alvo(
     df["mes_cos"] = np.cos(2 * np.pi * (mes - 1) / 12)
     df["elevacao_solar_alvo"] = calcular_elevacao_solar(df["timestamp"] + pd.Timedelta(hours=HORIZON_H))
 
-    # 3. Features adicionais usadas pelos pipelines de 39 atributos.
-    df["hora"] = df["timestamp"].dt.hour
-    df["dia_semana"] = df["timestamp"].dt.dayofweek
-    df["mes"] = df["timestamp"].dt.month
-    for col in [
-        "pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide",
-        "sulphur_dioxide", "ozone", "temperature_2m",
-        "precipitation", "wind_speed_10m",
-    ]:
-        df[f"{col}_lag_1h"] = df[col].shift(1)
-        df[f"{col}_lag_24h"] = df[col].shift(24)
-        df[f"{col}_media_24h"] = df[col].shift(1).rolling(24, min_periods=24).mean()
-
-
     # Ponto de partida exato t0 selecionado pelo usuario
     t0 = pd.Timestamp(f"{str_alvo} {hora_inicio:02d}:00:00")
     t_fim_24h = t0 + pd.Timedelta(hours=24)
@@ -416,10 +376,10 @@ def gerar_previsao_t0(
     t0 = row["timestamp"]
     t_alvo = t0 + pd.Timedelta(hours=24)
 
+    X = linha_t0[FROZEN_FEATURES]
+
     prevs = {}
     for nome_modelo, pipeline in modelos.items():
-        features_modelo = _features_esperadas(pipeline, linha_t0)
-        X = linha_t0[features_modelo]
         limiar = THRESHOLDS_MODELOS.get(nome_modelo, 0.50)
         prob = float(pipeline.predict_proba(X)[0, 1])
         pred = int(prob >= limiar)
@@ -478,13 +438,10 @@ def auditar_janela_24h_seguinte(
     audit_df["O₃ (ug/m³)"] = df_janela["ozone"].round(1)
     audit_df["PM2.5 (ug/m³)"] = df_janela["pm2_5"].round(1)
 
-    # Previsoes dos modelos geradas em cada hora; cada pipeline recebe seus atributos.
-    X_por_modelo = {
-        nome: df_janela[_features_esperadas(pipeline, df_janela)]
-        for nome, pipeline in modelos.items()
-    }
+    X = df_janela[FROZEN_FEATURES]
+
+    # Previsoes dos modelos geradas em cada hora
     for nome_modelo, pipeline in modelos.items():
-        X = X_por_modelo[nome_modelo]
         limiar = THRESHOLDS_MODELOS.get(nome_modelo, 0.50)
         probs = pipeline.predict_proba(X)[:, 1]
         preds = (probs >= limiar).astype(int)
@@ -498,7 +455,6 @@ def auditar_janela_24h_seguinte(
         audit_df["Poluente Crítico"] = df_janela["poluente_critico_agora"].values
 
         for nome_modelo, pipeline in modelos.items():
-            X = X_por_modelo[nome_modelo]
             limiar = THRESHOLDS_MODELOS.get(nome_modelo, 0.50)
             preds = (pipeline.predict_proba(X)[:, 1] >= limiar).astype(int)
 

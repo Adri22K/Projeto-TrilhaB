@@ -44,7 +44,10 @@ from sklearn.metrics import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PowerTransformer
 from sklearn.tree import DecisionTreeClassifier
-import xgboost as xgb
+try:
+    import xgboost as xgb
+except ImportError:
+    xgb = None
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -337,6 +340,15 @@ def main() -> dict:
         random_state=SEED,
         n_jobs=-1,
     )
+
+    if xgb is None:
+        raise ImportError(
+            "O pacote 'xgboost' não está instalado neste ambiente Python.\n"
+            "Por favor, instale executando no terminal:\n"
+            "    pip install -r requirements.txt\n"
+            "ou:\n"
+            "    pip install xgboost>=2.0.0"
+        )
 
     xgb_clf = xgb.XGBClassifier(
         n_estimators=200,

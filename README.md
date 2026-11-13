@@ -190,11 +190,20 @@ O projeto busca prever a ocorrência de horários com **qualidade do ar inadequa
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+
+# Execução do Pipeline Completo (Coleta, Análise, Modelagem e Comparativo):
+python pipeline.py
+
+# Ou execução passo a passo por Sprint:
 python src/coleta_integracao.py
 python src/prepara_sprint2.py
 python src/sprint3_baselines.py
 python src/sprint4_features.py
 python src/sprint5_modelos.py
+python src/modelos_arvore_random_forest.py
+
+# Iniciar o Dashboard Interativo (Streamlit):
+streamlit run app.py
 
 Configuração: `config/params.yaml`
 Notebooks: 01 → 05.

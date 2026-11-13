@@ -29,6 +29,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
 
+# Configuração da página Streamlit
 st.set_page_config(
     page_title="CADENC.IA | Previsão de Qualidade do Ar",
     page_icon="🌱",
@@ -36,6 +37,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Configuração global de estilo para gráficos Matplotlib
 plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Segoe UI", "DejaVu Sans", "Helvetica", "Arial"],
@@ -60,6 +62,7 @@ def estilizar_eixo(ax):
     ax.spines["bottom"].set_color("#cbd5e1")
     ax.grid(True, linestyle="--", alpha=0.5, color="#e2e8f0")
 
+# Estilização CSS personalizada para visual limpo, moderno e profissional
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -194,54 +197,9 @@ st.markdown("""
     }
 
     /* Barra Lateral e Navegação */
-    /* Barra lateral CADENC.IA — alto contraste e identidade visual */
     [data-testid="stSidebar"] {
-        background: #f4f0df !important;
-        border-right: 1px solid #d5dfd7 !important;
-    }
-
-    /* Textos, títulos e descrições da barra lateral */
-    [data-testid="stSidebar"],
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] small {
-        color: #0f3b4c !important;
-    }
-
-    /* Opções do menu de navegação */
-    [data-testid="stSidebar"] [data-testid="stRadio"] label,
-    [data-testid="stSidebar"] [role="radiogroup"] label,
-    [data-testid="stSidebar"] [data-testid="stRadio"] label p,
-    [data-testid="stSidebar"] [data-testid="stRadio"] label span {
-        color: #0f3b4c !important;
-        font-weight: 600 !important;
-        opacity: 1 !important;
-    }
-
-    /* Marcador das opções */
-    [data-testid="stSidebar"] [role="radio"] {
-        accent-color: #1f7a7a;
-    }
-
-    /* Cartão de status do pipeline */
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] strong {
-        color: #0f3b4c !important;
-    }
-
-    /* Divisórias e legenda */
-    [data-testid="stSidebar"] hr {
-        border-color: #cbd8d1 !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stCaptionContainer"],
-    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
-        color: #526b72 !important;
+        background-color: #f8fafc;
+        border-right: 1px solid #e2e8f0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -282,7 +240,7 @@ def carregar_dados():
 
 @st.cache_resource
 def carregar_pipelines():
-    """Carrega os 3 modelos de machine learning treinados em models/."""
+    """Carrega os 3 modelos de machine learning treinados em models/ de forma defensiva."""
     modelos = {}
     for nome, arq in [
         ("Decision Tree", "pipeline_decision_tree.joblib"),
@@ -291,13 +249,59 @@ def carregar_pipelines():
     ]:
         caminho = ROOT / "models" / arq
         if caminho.is_file():
-            modelos[nome] = joblib.load(caminho)
+            try:
+                modelos[nome] = joblib.load(caminho)
+            except Exception:
+                # Caso xgboost não esteja instalado ou ocorra erro de unpickling
+                pass
     return modelos
 
 
+def plotar_matriz_confusao_dinamica(y_true, y_pred, titulo: str):
+    """Gera a matriz de confusão dinamicamente com Matplotlib."""
+    from sklearn.metrics import confusion_matrix
+    cm = confusion_matrix(y_true, y_pred)
+    fig, ax = plt.subplots(figsize=(5.2, 4.2))
+    im = ax.imshow(cm, cmap="Blues")
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(["Adequada (0)", "Inadequada (1)"], fontweight="bold", fontsize=10)
+    ax.set_yticks([0, 1])
+    ax.set_yticklabels(["Adequada (0)", "Inadequada (1)"], fontweight="bold", fontsize=10)
+    ax.set_xlabel("Classe Prevista", fontweight="bold", fontsize=10)
+    ax.set_ylabel("Classe Real", fontweight="bold", fontsize=10)
+    ax.set_title(f"Matriz de Confusão — {titulo}", pad=12, fontweight="bold", fontsize=11)
+    total = np.sum(cm)
+    for i in range(2):
+        for j in range(2):
+            val = int(cm[i, j])
+            pct = (val / total) * 100 if total > 0 else 0
+            cor = "white" if val > cm.max() / 2 else "black"
+            ax.text(j, i, f"{val}\n({pct:.1f}%)", ha="center", va="center", color=cor, fontsize=11, fontweight="bold")
+    fig.colorbar(im, ax=ax, shrink=0.8)
+    fig.tight_layout()
+    return fig
+
+
+def plotar_importancia_dinamica(importancias, nomes_features, titulo: str):
+    """Gera o gráfico de barras horizontais de importância de atributos dinamicamente."""
+    df_imp = pd.DataFrame({"feature": nomes_features, "importancia": importancias})
+    df_imp = df_imp.sort_values("importancia", ascending=False).reset_index(drop=True)
+    df_top = df_imp.head(12).sort_values("importancia", ascending=True)
+    
+    fig, ax = plt.subplots(figsize=(6.5, 4.5))
+    ax.barh(df_top["feature"], df_top["importancia"], color="#2563eb", edgecolor="#1d4ed8")
+    ax.set_xlabel("Importância Relativa (Gini / Ganho)", fontweight="bold", fontsize=10)
+    ax.set_title(f"Top 12 Atributos Mais Determinantes — {titulo}", pad=12, fontweight="bold", fontsize=11)
+    ax.grid(axis="x", linestyle="--", alpha=0.5)
+    fig.tight_layout()
+    return fig, df_imp
+
+
+# Carregamento inicial
 interim, treino, teste, comparativo, erros, features = carregar_dados()
 modelos = carregar_pipelines()
 
+# Barra lateral (Sidebar)
 st.sidebar.image("docs/assets/cadencia-logo-clara.png" if (ROOT / "docs/assets/cadencia-logo-clara.png").is_file() else None, width=220)
 st.sidebar.markdown("### Navegação")
 menu = st.sidebar.radio(
@@ -324,8 +328,9 @@ st.sidebar.markdown("---")
 st.sidebar.caption("Projeto Trilha B — Equipe 2 · Mostra Tecnológica")
 
 
+# ==============================================================================
 # VISÃO 1: VISÃO GERAL & COLETA DE DADOS ABERTOS
-
+# ==============================================================================
 if menu == "📊 1. Visão Geral & Dados Abertos":
     render_hero_header(
         titulo="🌱 CADENC.IA — O Ritmo do Ar",
@@ -367,7 +372,9 @@ if menu == "📊 1. Visão Geral & Dados Abertos":
         st.caption(f"Amostra dos dados limpos integrados. Total de observações: {len(interim):,} linhas horárias.")
 
 
-#  VISÃO 2: ANÁLISE EXPLORATÓRIA (EDA)
+# ==============================================================================
+# VISÃO 2: ANÁLISE EXPLORATÓRIA (EDA)
+# ==============================================================================
 elif menu == "📈 2. Análise Exploratória (EDA)":
     render_hero_header(
         titulo="📈 Análise Exploratória dos Dados Abertos (EDA)",
@@ -392,6 +399,7 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
                 }.get(x, x)
             )
 
+        # Filtro de intervalo de datas
         min_date = interim["timestamp"].min().date()
         max_date = interim["timestamp"].max().date()
         with col_range:
@@ -402,9 +410,11 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         else:
             df_filtro = interim.head(1000)
 
+        # Gráfico interativo
         fig, ax = plt.subplots(figsize=(12, 4.2))
         ax.plot(df_filtro["timestamp"], df_filtro[variavel], color="#0284c7", lw=1.5, label=variavel)
         
+        # Limiar CETESB para Ozônio se aplicável
         if variavel == "ozone":
             ax.axhline(130, color="#ef4444", ls="--", lw=1.8, label="Limiar CETESB Ruim (130 µg/m³ - média 8h)")
         elif variavel == "pm10":
@@ -419,6 +429,7 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         st.pyplot(fig)
         plt.close(fig)
 
+        # Estatísticas resumidas da variável
         col_s1, col_s2, col_s3, col_s4 = st.columns(4)
         col_s1.metric("Média", f"{df_filtro[variavel].mean():.2f}")
         col_s2.metric("Mediana", f"{df_filtro[variavel].median():.2f}")
@@ -426,13 +437,15 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         col_s4.metric("Desvio Padrão", f"{df_filtro[variavel].std():.2f}")
 
 
+# ==============================================================================
 # VISÃO 3: COMPARATIVO: BASELINE VS. MODELOS
+# ==============================================================================
 elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
     render_hero_header(
         titulo="⚖️ Comparativo Geral: Baseline vs. Modelos de Machine Learning",
         subtitulo="Avaliação empírica no conjunto de teste independente (3.480 horas, 299 casos positivos observados)",
         badges=["🏆 Random Forest Líder ROC-AUC", "🛡️ Decision Tree Líder Recall F₂", "🚀 XGBoost Gradient Boosting", "📉 -53% Falsos Negativos"]
-    )    
+    )
 
     st.markdown("""
     <div class="highlight-card">
@@ -489,6 +502,7 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
         st.pyplot(fig)
         plt.close(fig)
 
+        # Destaques em cards
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown("""
@@ -523,14 +537,22 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
                 </ul>
             </div>
             """, unsafe_allow_html=True)
+    else:
+        st.warning(
+            "⚠️ **Quadro comparativo ainda não gerado neste ambiente.**\n\n"
+            "Para computar as métricas de acurácia, recall, F₂, ROC-AUC e redução de falsos negativos:\n"
+            "👉 Acesse a aba **'⚡ 6. Executar Pipeline Completo'** e clique em **'🚀 Executar Pipeline Completo Agora'**."
+        )
 
 
+# ==============================================================================
 # VISÃO 4: DIAGNÓSTICO DETALHADO DOS MODELOS
-    elif menu == "🔬 4. Diagnóstico Detalhado dos Modelos":
-        render_hero_header(
-            titulo="🔬 Diagnóstico Detalhado e Interpretação dos Modelos",
-            subtitulo="Matrizes de confusão com limiar padrão vs. calibrado por F₂, importância de variáveis e regras extraídas",
-            badges=["🔍 Matrizes de Confusão", "📊 Importância de Features", "🌳 Visualização de Árvore", "📜 Regras Transparentes"]
+# ==============================================================================
+elif menu == "🔬 4. Diagnóstico Detalhado dos Modelos":
+    render_hero_header(
+        titulo="🔬 Diagnóstico Detalhado e Interpretação dos Modelos",
+        subtitulo="Matrizes de confusão com limiar padrão vs. calibrado por F₂, importância de variáveis e regras extraídas",
+        badges=["🔍 Matrizes de Confusão", "📊 Importância de Features", "🌳 Visualização de Árvore", "📜 Regras Transparentes"]
     )
 
     modelo_escolhido = st.selectbox("Selecione o modelo para inspecionar:", ["Decision Tree", "Random Forest", "XGBoost"])
@@ -542,47 +564,107 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
 
     dir_rel = ROOT / f"reports/modelos_decision_tree_random_forest/{subpasta}"
 
+    p_img_padrao = dir_rel / f"matriz_{subpasta}_padrao.png"
+    p_img_f2 = dir_rel / f"matriz_{subpasta}_calibrado_f2.png"
+    p_img_imp = dir_rel / f"importancia_features_{subpasta}.png"
+    p_csv_imp = dir_rel / f"importancia_features_{subpasta}.csv"
+    p_rules = dir_rel / "regras_arvore_decisao.txt"
+
+    pipe = modelos.get(modelo_escolhido)
+    alvo_col = "qualidade_inadequada_24h"
+    tem_teste = (teste is not None) and (alvo_col in teste.columns) and all(f in teste.columns for f in features)
+
+    limiares_f2_map = {
+        "Decision Tree": 0.42,
+        "Random Forest": 0.35,
+        "XGBoost": 0.38,
+    }
+    limiar_f2_val = limiares_f2_map.get(modelo_escolhido, 0.35)
+    if comparativo is not None and "modelo" in comparativo.columns:
+        linha_calib = comparativo[
+            comparativo["modelo"].str.contains(modelo_escolhido, case=False, na=False) & 
+            comparativo["modelo"].str.contains("F2", case=False, na=False)
+        ]
+        if not linha_calib.empty and "limiar" in linha_calib.columns:
+            limiar_f2_val = float(linha_calib.iloc[0]["limiar"])
+
     col_mat1, col_mat2 = st.columns(2)
     with col_mat1:
         st.markdown("#### Matriz de Confusão — Limiar Padrão (0,50)")
-        p_img_padrao = dir_rel / f"matriz_{subpasta}_padrao.png"
         if p_img_padrao.is_file():
             st.image(str(p_img_padrao), use_container_width=True)
+        elif pipe is not None and tem_teste:
+            probs = pipe.predict_proba(teste[features])[:, 1]
+            y_pred_padrao = (probs >= 0.50).astype(int)
+            fig_padrao = plotar_matriz_confusao_dinamica(teste[alvo_col].values, y_pred_padrao, f"{modelo_escolhido} (0,50)")
+            st.pyplot(fig_padrao)
+            plt.close(fig_padrao)
+        else:
+            st.info("ℹ️ Matriz de confusão indisponível localmente. Treine os modelos na aba '⚡ 6. Executar Pipeline Completo'.")
 
     with col_mat2:
-        st.markdown("#### Matriz de Confusão — Limiar Calibrado por $F_2$")
-        p_img_f2 = dir_rel / f"matriz_{subpasta}_calibrado_f2.png"
+        st.markdown(f"#### Matriz de Confusão — Limiar Calibrado por $F_2$ ({limiar_f2_val:.2f})")
         if p_img_f2.is_file():
             st.image(str(p_img_f2), use_container_width=True)
+        elif pipe is not None and tem_teste:
+            probs = pipe.predict_proba(teste[features])[:, 1]
+            y_pred_f2 = (probs >= limiar_f2_val).astype(int)
+            fig_f2 = plotar_matriz_confusao_dinamica(teste[alvo_col].values, y_pred_f2, f"{modelo_escolhido} (F₂={limiar_f2_val:.2f})")
+            st.pyplot(fig_f2)
+            plt.close(fig_f2)
+        else:
+            st.info(f"ℹ️ Matriz calibrada por F₂ indisponível. Treine os modelos na aba '⚡ 6. Executar Pipeline Completo'.")
 
     st.markdown("---")
     st.markdown(f"#### 🏆 Atributos Mais Determinantes (Importância de Features) — {modelo_escolhido}")
 
     col_imp1, col_imp2 = st.columns([1.2, 1])
     with col_imp1:
-        p_img_imp = dir_rel / f"importancia_features_{subpasta}.png"
         if p_img_imp.is_file():
             st.image(str(p_img_imp), use_container_width=True)
+        elif pipe is not None and hasattr(pipe.named_steps.get("classificador", None), "feature_importances_"):
+            imps = pipe.named_steps["classificador"].feature_importances_
+            fig_imp, df_imp_din = plotar_importancia_dinamica(imps, features, modelo_escolhido)
+            st.pyplot(fig_imp)
+            plt.close(fig_imp)
+        else:
+            st.info("ℹ️ Gráfico de importância indisponível neste ambiente.")
 
     with col_imp2:
-        p_csv_imp = dir_rel / f"importancia_features_{subpasta}.csv"
         if p_csv_imp.is_file():
             df_imp = pd.read_csv(p_csv_imp)
             st.dataframe(df_imp.head(10).style.format({"importancia": "{:.4f}"}), use_container_width=True)
+        elif pipe is not None and hasattr(pipe.named_steps.get("classificador", None), "feature_importances_"):
+            imps = pipe.named_steps["classificador"].feature_importances_
+            df_imp_din = pd.DataFrame({"feature": features, "importancia": imps}).sort_values("importancia", ascending=False)
+            st.dataframe(df_imp_din.head(10).style.format({"importancia": "{:.4f}"}), use_container_width=True)
+        else:
+            st.info("ℹ️ Tabela de atributos indisponível neste ambiente.")
 
     if modelo_escolhido == "Decision Tree":
         with st.expander("📜 Ver Regras Textuais da Árvore de Decisão"):
-            p_rules = dir_rel / "regras_arvore_decisao.txt"
             if p_rules.is_file():
                 st.code(p_rules.read_text(encoding="utf-8")[:2500], language="text")
+            elif pipe is not None:
+                from sklearn.tree import export_text
+                clf_dt = pipe.named_steps.get("classificador")
+                if clf_dt is not None:
+                    regras_txt = export_text(clf_dt, feature_names=features, max_depth=4)
+                    st.code(regras_txt[:2500], language="text")
+                else:
+                    st.info("Classificador da árvore não disponível no pipeline.")
+            else:
+                st.info("Regras textuais indisponíveis. Execute o treinamento na aba '⚡ 6. Executar Pipeline Completo'.")
 
 
+# ==============================================================================
 # VISÃO 5: TESTAR NOVA DATA & PREVISÃO 24H (API AO VIVO)
-    elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
-        render_hero_header(
-            titulo="📅 Consulta ao Vivo, Previsão 24h e Auditoria de Modelos",
-            subtitulo="Escolha qualquer data e horário para São Paulo. O sistema consulta a API Open-Meteo em tempo real, monitora latência e consumo de RAM, projeta as condições para as 24 horas seguintes e audita as previsões frente ao padrão oficial CETESB N3+.",
-            badges=["🌐 Open-Meteo API ao Vivo", "⚡ Telemetria de RAM e Latência", "🎯 Previsão t₀ ➔ t₀+24h", "📈 Trajetória 24h Seguintes", "⚖️ Critérios Formais de Aprovação"]
+# ==============================================================================
+elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
+    render_hero_header(
+        titulo="📅 Consulta ao Vivo, Previsão 24h e Auditoria de Modelos",
+        subtitulo="Escolha qualquer data e horário para São Paulo. O sistema consulta a API Open-Meteo em tempo real, monitora latência e consumo de RAM, projeta as condições para as 24 horas seguintes e audita as previsões frente ao padrão oficial CETESB N3+.",
+        badges=["🌐 Open-Meteo API ao Vivo", "⚡ Telemetria de RAM e Latência", "🎯 Previsão t₀ ➔ t₀+24h", "📈 Trajetória 24h Seguintes", "⚖️ Critérios Formais de Aprovação"]
     )
 
     import importlib
@@ -633,6 +715,7 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
 
     btn_consultar = st.button("🚀 Consultar API e Gerar Previsão para as Próximas 24 Horas", type="primary", use_container_width=True)
 
+    # Execução da consulta
     if btn_consultar:
         ts_inicio_str = f"{data_selecionada} às {hora_selecionada:02d}:00"
         with st.spinner(f"Consultando APIs Open-Meteo (Qualidade do Ar + Meteorologia) para São Paulo iniciando em {ts_inicio_str}..."):
@@ -658,6 +741,7 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
             except Exception as e:
                 st.error(f"Erro na consulta à API ou processamento: {e}")
 
+    # Exibição dos resultados
     if "resultado_v5" in st.session_state:
         res = st.session_state["resultado_v5"]
         meta = res["meta"]
@@ -744,6 +828,7 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
                     )
                     st.caption(f"Limiar de decisão: {info_p.get('limiar', 0.5):.2f}")
 
+            # Auditoria de Acerto (se data passada)
             if prev_t0["tem_ground_truth"] and prev_t0["real_rotulo"]:
                 st.markdown("##### ⚖️ Verificação com a Realidade Observada 24 Horas Depois:")
                 st.markdown(f"""
@@ -786,7 +871,7 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
             if probs_dt:
                 ax.plot(horas_janela, probs_dt, marker="^", linewidth=1.8, color="#d97706", linestyle="--", label="Decision Tree (Probabilidade)")
 
-           
+            # Destacar horas com ar inadequado se houver dados reais
             if "Realidade CETESB" in audit_janela.columns:
                 ja_anotou = False
                 for idx_h, status_real in enumerate(audit_janela["Realidade CETESB"]):
@@ -812,8 +897,9 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
             st.markdown("#### 📋 Tabela Detalhada das 24 Horas Seguintes:")
             st.dataframe(audit_janela.drop(columns=["timestamp"], errors="ignore"), use_container_width=True, height=360)
 
-    
+    # ==========================================================================
     # SEÇÃO OBRIGATÓRIA: COMPROVAÇÃO DE QUAL MODELO FOI O MELHOR E CRITÉRIOS
+    # ==========================================================================
     st.markdown("---")
     st.markdown('<div class="main-title" style="font-size: 1.8rem;">🏆 Comprovação: Qual Modelo Foi o Melhor e Quais os Critérios de Aprovação?</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">Evidências empíricas auditadas no conjunto de teste independente (3.480 horas / 299 eventos críticos).</div>', unsafe_allow_html=True)
@@ -896,17 +982,14 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
 
 
 
+# ==============================================================================
 # VISÃO 6: EXECUTAR PIPELINE COMPLETO
+# ==============================================================================
 elif menu == "⚡ 6. Executar Pipeline Completo":
     render_hero_header(
         titulo="⚡ Orquestrador do Pipeline de Ponta a Ponta",
         subtitulo="Dispare a execução completa e automatizada: coleta, tratamento, modelagem e comparação contra baselines",
-        badges=[
-            "🔄 Pipeline Automatizado",
-            "🧼 Limpeza e Purga 24h",
-            "🧠 Treinamento e Calibração",
-            "📊 Geração de Relatórios"
-        ]
+        badges=["🔄 Pipeline Automatizado", "🧼 Limpeza e Purga 24h", "🧠 Treinamento e Calibração", "📊 Geração de Relatórios"]
     )
 
     st.markdown("""
@@ -915,29 +998,30 @@ elif menu == "⚡ 6. Executar Pipeline Completo":
         <ol style="margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
             <li><strong>Coleta e Integração:</strong> Consulta ou verifica o repositório bruto das APIs públicas da Open-Meteo.</li>
             <li><strong>Limpeza e Split Temporal:</strong> Trata sentinelas, padroniza unidades e aplica purga temporal estrita de 24 horas.</li>
-            <li><strong>Modelagem e Calibração:</strong> Treina Decision Tree, Random Forest e XGBoost com ColumnTransformer e calibra limiares por F2.</li>
-            <li><strong>Comparação e Auditoria:</strong> Avalia contra a Persistência Temporal e gera relatórios e métricas.</li>
+            <li><strong>Modelagem e Calibração:</strong> Treina Decision Tree, Random Forest e XGBoost com <code>ColumnTransformer</code> (Yeo-Johnson) e calibra limiares ótimos por $F_2$.</li>
+            <li><strong>Comparação e Auditoria:</strong> Avalia contra a Persistência Temporal e regera todos os relatórios e métricas.</li>
         </ol>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button(
-        "🚀 Executar Pipeline Completo Agora",
-        type="primary",
-        use_container_width=True
-    ):
-        import pipeline_completo
-
-        with st.spinner("Executando pipeline completo... Isso pode levar de 30 a 60 segundos."):
-            res = pipeline_completo.executar_pipeline_completo(
-                forcar_recoleta=False
+    if st.button("🚀 Executar Pipeline Completo Agora", type="primary", use_container_width=True):
+        try:
+            import pipeline_completo
+            with st.spinner("Executando pipeline completo... Isso pode levar de 30 a 60 segundos."):
+                res = pipeline_completo.executar_pipeline_completo(forcar_recoleta=False)
+                st.success(f"Pipeline executado com sucesso em {res['tempo_execucao_s']:.2f} segundos!")
+                st.dataframe(pd.DataFrame(res["comparativo"]), use_container_width=True)
+                st.cache_data.clear()
+                st.cache_resource.clear()
+                st.rerun()
+        except ImportError as e:
+            st.error(
+                f"❌ **Dependência ausente no ambiente Python:** {e}\n\n"
+                f"💡 **Como resolver:** Instale os pacotes necessários executando no seu terminal:\n"
+                f"```bash\npip install -r requirements.txt\n```"
             )
+        except Exception as e:
+            st.error(f"❌ **Erro durante a execução do pipeline:** {e}")
 
-            st.success(
-                f"Pipeline executado com sucesso em {res['tempo_execucao_s']:.2f} segundos!"
-            )
 
-            st.dataframe(
-                pd.DataFrame(res["comparativo"]),
-                use_container_width=True
-            )
+

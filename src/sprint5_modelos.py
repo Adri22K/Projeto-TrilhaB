@@ -38,7 +38,10 @@ from sklearn.metrics import (average_precision_score, confusion_matrix, fbeta_sc
 from sklearn.model_selection import FixedThresholdClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
-import xgboost as xgb
+try:
+    import xgboost as xgb
+except ImportError:
+    xgb = None
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
