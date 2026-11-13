@@ -29,7 +29,6 @@ import yaml
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
 
-# Configuração da página Streamlit
 st.set_page_config(
     page_title="CADENC.IA | Previsão de Qualidade do Ar",
     page_icon="🌱",
@@ -37,7 +36,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Configuração global de estilo para gráficos Matplotlib
 plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Segoe UI", "DejaVu Sans", "Helvetica", "Arial"],
@@ -62,7 +60,6 @@ def estilizar_eixo(ax):
     ax.spines["bottom"].set_color("#cbd5e1")
     ax.grid(True, linestyle="--", alpha=0.5, color="#e2e8f0")
 
-# Estilização CSS personalizada para visual limpo, moderno e profissional
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -197,9 +194,54 @@ st.markdown("""
     }
 
     /* Barra Lateral e Navegação */
+    /* Barra lateral CADENC.IA — alto contraste e identidade visual */
     [data-testid="stSidebar"] {
-        background-color: #f8fafc;
-        border-right: 1px solid #e2e8f0;
+        background: #f4f0df !important;
+        border-right: 1px solid #d5dfd7 !important;
+    }
+
+    /* Textos, títulos e descrições da barra lateral */
+    [data-testid="stSidebar"],
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] small {
+        color: #0f3b4c !important;
+    }
+
+    /* Opções do menu de navegação */
+    [data-testid="stSidebar"] [data-testid="stRadio"] label,
+    [data-testid="stSidebar"] [role="radiogroup"] label,
+    [data-testid="stSidebar"] [data-testid="stRadio"] label p,
+    [data-testid="stSidebar"] [data-testid="stRadio"] label span {
+        color: #0f3b4c !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+    }
+
+    /* Marcador das opções */
+    [data-testid="stSidebar"] [role="radio"] {
+        accent-color: #1f7a7a;
+    }
+
+    /* Cartão de status do pipeline */
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] strong {
+        color: #0f3b4c !important;
+    }
+
+    /* Divisórias e legenda */
+    [data-testid="stSidebar"] hr {
+        border-color: #cbd8d1 !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+        color: #526b72 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -253,11 +295,9 @@ def carregar_pipelines():
     return modelos
 
 
-# Carregamento inicial
 interim, treino, teste, comparativo, erros, features = carregar_dados()
 modelos = carregar_pipelines()
 
-# Barra lateral (Sidebar)
 st.sidebar.image("docs/assets/cadencia-logo-clara.png" if (ROOT / "docs/assets/cadencia-logo-clara.png").is_file() else None, width=220)
 st.sidebar.markdown("### Navegação")
 menu = st.sidebar.radio(
@@ -284,9 +324,8 @@ st.sidebar.markdown("---")
 st.sidebar.caption("Projeto Trilha B — Equipe 2 · Mostra Tecnológica")
 
 
-# ==============================================================================
 # VISÃO 1: VISÃO GERAL & COLETA DE DADOS ABERTOS
-# ==============================================================================
+
 if menu == "📊 1. Visão Geral & Dados Abertos":
     render_hero_header(
         titulo="🌱 CADENC.IA — O Ritmo do Ar",
@@ -328,9 +367,7 @@ if menu == "📊 1. Visão Geral & Dados Abertos":
         st.caption(f"Amostra dos dados limpos integrados. Total de observações: {len(interim):,} linhas horárias.")
 
 
-# ==============================================================================
-# VISÃO 2: ANÁLISE EXPLORATÓRIA (EDA)
-# ==============================================================================
+#  VISÃO 2: ANÁLISE EXPLORATÓRIA (EDA)
 elif menu == "📈 2. Análise Exploratória (EDA)":
     render_hero_header(
         titulo="📈 Análise Exploratória dos Dados Abertos (EDA)",
@@ -355,7 +392,6 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
                 }.get(x, x)
             )
 
-        # Filtro de intervalo de datas
         min_date = interim["timestamp"].min().date()
         max_date = interim["timestamp"].max().date()
         with col_range:
@@ -366,11 +402,9 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         else:
             df_filtro = interim.head(1000)
 
-        # Gráfico interativo
         fig, ax = plt.subplots(figsize=(12, 4.2))
         ax.plot(df_filtro["timestamp"], df_filtro[variavel], color="#0284c7", lw=1.5, label=variavel)
         
-        # Limiar CETESB para Ozônio se aplicável
         if variavel == "ozone":
             ax.axhline(130, color="#ef4444", ls="--", lw=1.8, label="Limiar CETESB Ruim (130 µg/m³ - média 8h)")
         elif variavel == "pm10":
@@ -385,7 +419,6 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         st.pyplot(fig)
         plt.close(fig)
 
-        # Estatísticas resumidas da variável
         col_s1, col_s2, col_s3, col_s4 = st.columns(4)
         col_s1.metric("Média", f"{df_filtro[variavel].mean():.2f}")
         col_s2.metric("Mediana", f"{df_filtro[variavel].median():.2f}")
@@ -393,10 +426,8 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
         col_s4.metric("Desvio Padrão", f"{df_filtro[variavel].std():.2f}")
 
 
-# ==============================================================================
 # VISÃO 3: COMPARATIVO: BASELINE VS. MODELOS
-# ==============================================================================
-elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
+    elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
     render_hero_header(
         titulo="⚖️ Comparativo Geral: Baseline vs. Modelos de Machine Learning",
         subtitulo="Avaliação empírica no conjunto de teste independente (3.480 horas, 299 casos positivos observados)",
@@ -458,7 +489,6 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
         st.pyplot(fig)
         plt.close(fig)
 
-        # Destaques em cards
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown("""
@@ -495,10 +525,8 @@ elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
             """, unsafe_allow_html=True)
 
 
-# ==============================================================================
 # VISÃO 4: DIAGNÓSTICO DETALHADO DOS MODELOS
-# ==============================================================================
-elif menu == "🔬 4. Diagnóstico Detalhado dos Modelos":
+    elif menu == "🔬 4. Diagnóstico Detalhado dos Modelos":
     render_hero_header(
         titulo="🔬 Diagnóstico Detalhado e Interpretação dos Modelos",
         subtitulo="Matrizes de confusão com limiar padrão vs. calibrado por F₂, importância de variáveis e regras extraídas",
@@ -549,10 +577,8 @@ elif menu == "🔬 4. Diagnóstico Detalhado dos Modelos":
                 st.code(p_rules.read_text(encoding="utf-8")[:2500], language="text")
 
 
-# ==============================================================================
 # VISÃO 5: TESTAR NOVA DATA & PREVISÃO 24H (API AO VIVO)
-# ==============================================================================
-elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
+    elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
     render_hero_header(
         titulo="📅 Consulta ao Vivo, Previsão 24h e Auditoria de Modelos",
         subtitulo="Escolha qualquer data e horário para São Paulo. O sistema consulta a API Open-Meteo em tempo real, monitora latência e consumo de RAM, projeta as condições para as 24 horas seguintes e audita as previsões frente ao padrão oficial CETESB N3+.",
@@ -607,7 +633,6 @@ elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
 
     btn_consultar = st.button("🚀 Consultar API e Gerar Previsão para as Próximas 24 Horas", type="primary", use_container_width=True)
 
-    # Execução da consulta
     if btn_consultar:
         ts_inicio_str = f"{data_selecionada} às {hora_selecionada:02d}:00"
         with st.spinner(f"Consultando APIs Open-Meteo (Qualidade do Ar + Meteorologia) para São Paulo iniciando em {ts_inicio_str}..."):
@@ -633,7 +658,6 @@ elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
             except Exception as e:
                 st.error(f"Erro na consulta à API ou processamento: {e}")
 
-    # Exibição dos resultados
     if "resultado_v5" in st.session_state:
         res = st.session_state["resultado_v5"]
         meta = res["meta"]
@@ -720,7 +744,6 @@ elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
                     )
                     st.caption(f"Limiar de decisão: {info_p.get('limiar', 0.5):.2f}")
 
-            # Auditoria de Acerto (se data passada)
             if prev_t0["tem_ground_truth"] and prev_t0["real_rotulo"]:
                 st.markdown("##### ⚖️ Verificação com a Realidade Observada 24 Horas Depois:")
                 st.markdown(f"""
@@ -763,7 +786,7 @@ elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
             if probs_dt:
                 ax.plot(horas_janela, probs_dt, marker="^", linewidth=1.8, color="#d97706", linestyle="--", label="Decision Tree (Probabilidade)")
 
-            # Destacar horas com ar inadequado se houver dados reais
+           
             if "Realidade CETESB" in audit_janela.columns:
                 ja_anotou = False
                 for idx_h, status_real in enumerate(audit_janela["Realidade CETESB"]):
@@ -789,9 +812,8 @@ elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
             st.markdown("#### 📋 Tabela Detalhada das 24 Horas Seguintes:")
             st.dataframe(audit_janela.drop(columns=["timestamp"], errors="ignore"), use_container_width=True, height=360)
 
-    # ==========================================================================
+    
     # SEÇÃO OBRIGATÓRIA: COMPROVAÇÃO DE QUAL MODELO FOI O MELHOR E CRITÉRIOS
-    # ==========================================================================
     st.markdown("---")
     st.markdown('<div class="main-title" style="font-size: 1.8rem;">🏆 Comprovação: Qual Modelo Foi o Melhor e Quais os Critérios de Aprovação?</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">Evidências empíricas auditadas no conjunto de teste independente (3.480 horas / 299 eventos críticos).</div>', unsafe_allow_html=True)
@@ -874,10 +896,8 @@ elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
 
 
 
-# ==============================================================================
 # VISÃO 6: EXECUTAR PIPELINE COMPLETO
-# ==============================================================================
-elif menu == "⚡ 6. Executar Pipeline Completo":
+    elif menu == "⚡ 6. Executar Pipeline Completo":
     render_hero_header(
         titulo="⚡ Orquestrador do Pipeline de Ponta a Ponta",
         subtitulo="Dispare a execução completa e automatizada: coleta, tratamento, modelagem e comparação contra baselines",
