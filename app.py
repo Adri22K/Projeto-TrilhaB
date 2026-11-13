@@ -428,11 +428,11 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
 
 # VISÃO 3: COMPARATIVO: BASELINE VS. MODELOS
     elif menu == "⚖️ 3. Comparativo: Baseline vs. Modelos":
-    render_hero_header(
-        titulo="⚖️ Comparativo Geral: Baseline vs. Modelos de Machine Learning",
-        subtitulo="Avaliação empírica no conjunto de teste independente (3.480 horas, 299 casos positivos observados)",
-        badges=["🏆 Random Forest Líder ROC-AUC", "🛡️ Decision Tree Líder Recall F₂", "🚀 XGBoost Gradient Boosting", "📉 -53% Falsos Negativos"]
-    )
+        render_hero_header(
+            titulo="⚖️ Comparativo Geral: Baseline vs. Modelos de Machine Learning",
+            subtitulo="Avaliação empírica no conjunto de teste independente (3.480 horas, 299 casos positivos observados)",
+            badges=["🏆 Random Forest Líder ROC-AUC", "🛡️ Decision Tree Líder Recall F₂", "🚀 XGBoost Gradient Boosting", "📉 -53% Falsos Negativos"]
+    )    
 
     st.markdown("""
     <div class="highlight-card">
