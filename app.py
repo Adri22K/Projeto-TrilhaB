@@ -527,10 +527,10 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
 
 # VISÃO 4: DIAGNÓSTICO DETALHADO DOS MODELOS
     elif menu == "🔬 4. Diagnóstico Detalhado dos Modelos":
-    render_hero_header(
-        titulo="🔬 Diagnóstico Detalhado e Interpretação dos Modelos",
-        subtitulo="Matrizes de confusão com limiar padrão vs. calibrado por F₂, importância de variáveis e regras extraídas",
-        badges=["🔍 Matrizes de Confusão", "📊 Importância de Features", "🌳 Visualização de Árvore", "📜 Regras Transparentes"]
+        render_hero_header(
+            titulo="🔬 Diagnóstico Detalhado e Interpretação dos Modelos",
+            subtitulo="Matrizes de confusão com limiar padrão vs. calibrado por F₂, importância de variáveis e regras extraídas",
+            badges=["🔍 Matrizes de Confusão", "📊 Importância de Features", "🌳 Visualização de Árvore", "📜 Regras Transparentes"]
     )
 
     modelo_escolhido = st.selectbox("Selecione o modelo para inspecionar:", ["Decision Tree", "Random Forest", "XGBoost"])
@@ -579,10 +579,10 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
 
 # VISÃO 5: TESTAR NOVA DATA & PREVISÃO 24H (API AO VIVO)
     elif menu == "📅 5. Testar Nova Data & Previsão 24h (API ao Vivo)":
-    render_hero_header(
-        titulo="📅 Consulta ao Vivo, Previsão 24h e Auditoria de Modelos",
-        subtitulo="Escolha qualquer data e horário para São Paulo. O sistema consulta a API Open-Meteo em tempo real, monitora latência e consumo de RAM, projeta as condições para as 24 horas seguintes e audita as previsões frente ao padrão oficial CETESB N3+.",
-        badges=["🌐 Open-Meteo API ao Vivo", "⚡ Telemetria de RAM e Latência", "🎯 Previsão t₀ ➔ t₀+24h", "📈 Trajetória 24h Seguintes", "⚖️ Critérios Formais de Aprovação"]
+        render_hero_header(
+            titulo="📅 Consulta ao Vivo, Previsão 24h e Auditoria de Modelos",
+            subtitulo="Escolha qualquer data e horário para São Paulo. O sistema consulta a API Open-Meteo em tempo real, monitora latência e consumo de RAM, projeta as condições para as 24 horas seguintes e audita as previsões frente ao padrão oficial CETESB N3+.",
+            badges=["🌐 Open-Meteo API ao Vivo", "⚡ Telemetria de RAM e Latência", "🎯 Previsão t₀ ➔ t₀+24h", "📈 Trajetória 24h Seguintes", "⚖️ Critérios Formais de Aprovação"]
     )
 
     import importlib
@@ -898,10 +898,10 @@ elif menu == "📈 2. Análise Exploratória (EDA)":
 
 # VISÃO 6: EXECUTAR PIPELINE COMPLETO
     elif menu == "⚡ 6. Executar Pipeline Completo":
-    render_hero_header(
-        titulo="⚡ Orquestrador do Pipeline de Ponta a Ponta",
-        subtitulo="Dispare a execução completa e automatizada: coleta, tratamento, modelagem e comparação contra baselines",
-        badges=["🔄 Pipeline Automatizado", "🧼 Limpeza e Purga 24h", "🧠 Treinamento e Calibração", "📊 Geração de Relatórios"]
+        render_hero_header(
+            titulo="⚡ Orquestrador do Pipeline de Ponta a Ponta",
+            subtitulo="Dispare a execução completa e automatizada: coleta, tratamento, modelagem e comparação contra baselines",
+            badges=["🔄 Pipeline Automatizado", "🧼 Limpeza e Purga 24h", "🧠 Treinamento e Calibração", "📊 Geração de Relatórios"]
     )
 
     st.markdown("""
