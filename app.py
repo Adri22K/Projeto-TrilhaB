@@ -1004,16 +1004,29 @@ elif menu == "⚡ 6. Executar Pipeline Completo":
     </div>
     """, unsafe_allow_html=True)
 
+    st.info(
+        "💡 **Nota de Desempenho:** Em servidores com recursos limitados (como o plano gratuito do Streamlit Cloud), "
+        "o retreinamento completo dos 3 algoritmos pode levar de 1 a 2 minutos. Os modelos já treinados e relatórios "
+        "incluídos no repositório dispensam reexecução imediata."
+    )
+
     if st.button("🚀 Executar Pipeline Completo Agora", type="primary", use_container_width=True):
+        import contextlib
+        import io
+        import traceback
+
+        log_buffer = io.StringIO()
         try:
             import pipeline_completo
-            with st.spinner("Executando pipeline completo... Isso pode levar de 30 a 60 segundos."):
-                res = pipeline_completo.executar_pipeline_completo(forcar_recoleta=False)
-                st.success(f"Pipeline executado com sucesso em {res['tempo_execucao_s']:.2f} segundos!")
-                st.dataframe(pd.DataFrame(res["comparativo"]), use_container_width=True)
+            with st.spinner("Executando pipeline completo em modo otimizado... Aguarde de 30 a 90 segundos."):
+                with contextlib.redirect_stdout(log_buffer):
+                    res = pipeline_completo.executar_pipeline_completo(forcar_recoleta=False)
                 st.cache_data.clear()
                 st.cache_resource.clear()
-                st.rerun()
+                st.success(f"✅ Pipeline executado com sucesso em {res['tempo_execucao_s']:.2f} segundos! Todas as imagens e modelos foram atualizados.")
+                st.dataframe(pd.DataFrame(res["comparativo"]), use_container_width=True)
+                with st.expander("📋 Ver Log de Execução"):
+                    st.code(log_buffer.getvalue(), language="text")
         except ImportError as e:
             st.error(
                 f"❌ **Dependência ausente no ambiente Python:** {e}\n\n"
@@ -1021,7 +1034,15 @@ elif menu == "⚡ 6. Executar Pipeline Completo":
                 f"```bash\npip install -r requirements.txt\n```"
             )
         except Exception as e:
-            st.error(f"❌ **Erro durante a execução do pipeline:** {e}")
+            st.error(
+                f"❌ **Erro durante a execução do pipeline:** {e}\n\n"
+                "💡 *Dica para Windows/OneDrive:* Se o projeto estiver dentro de uma pasta sincronizada pelo OneDrive ou com arquivos abertos, "
+                "pause a sincronização ou mova a pasta do projeto para `C:\\Projetos\\` e tente novamente."
+            )
+            with st.expander("🔍 Ver detalhes técnicos do erro (Traceback)"):
+                if log_buffer.getvalue():
+                    st.code(log_buffer.getvalue(), language="text")
+                st.code(traceback.format_exc(), language="python")
 
 
 
