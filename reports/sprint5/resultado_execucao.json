@@ -45,17 +45,17 @@
     "Naive Bayes": "padrao",
     "Regressao Logistica": "C=0.01",
     "Decision Tree": "max_depth=4",
-    "Random Forest": "max_depth=8, min_samples_leaf=20",
-    "HistGradientBoosting": "learning_rate=0.05, max_depth=3",
+    "Random Forest": "max_depth=12, min_samples_leaf=8",
+    "HistGradientBoosting": "learning_rate=0.05, max_depth=4",
     "XGBoost": "learning_rate=0.03, max_depth=4"
   },
   "limiares_validacao": {
     "Naive Bayes": 0.2,
     "Regressao Logistica": 0.5,
     "Decision Tree": 0.35,
-    "Random Forest": 0.4,
-    "HistGradientBoosting": 0.25,
-    "XGBoost": 0.35
+    "Random Forest": 0.35,
+    "HistGradientBoosting": 0.1,
+    "XGBoost": 0.2
   },
   "f2_validacao": {
     "Dummy": 0.0,
@@ -63,9 +63,9 @@
     "Naive Bayes": 0.7398141529664046,
     "Regressao Logistica": 0.7440902578796562,
     "Decision Tree": 0.7233414379993053,
-    "Random Forest": 0.738615664845173,
-    "HistGradientBoosting": 0.7072368421052632,
-    "XGBoost": 0.732412763575294
+    "Random Forest": 0.7387090875845675,
+    "HistGradientBoosting": 0.7181500872600349,
+    "XGBoost": 0.7315798641351681
   },
   "dummy_validacao": {
     "precisao_c1": 0.0,
@@ -91,13 +91,23 @@
     "fn": 371,
     "tp": 565
   },
-  "regra_selecao": "maior F2 na validacao temporal; empate <= 0.005 -> modelo mais simples",
-  "selecionado_na_validacao": "Naive Bayes",
-  "modelo_final": "Naive Bayes",
+  "recall_validacao": {
+    "Dummy": 0.0,
+    "Persistencia": 0.6036324786324786,
+    "Naive Bayes": 0.8846153846153846,
+    "Regressao Logistica": 0.8878205128205128,
+    "Decision Tree": 0.8899572649572649,
+    "Random Forest": 0.8632478632478633,
+    "HistGradientBoosting": 0.8792735042735043,
+    "XGBoost": 0.8974358974358975
+  },
+  "regra_selecao": "maior recall da classe 1 na validacao temporal, com limiares max F2; F2 >= persistencia; desempate por F2 e ordem de simplicidade",
+  "selecionado_na_validacao": "XGBoost",
+  "modelo_final": "XGBoost",
   "limiar_final": 0.2,
   "versoes": {
-    "sklearn": "1.8.0",
-    "pandas": "2.2.3",
-    "numpy": "2.3.5"
+    "sklearn": "1.9.1",
+    "pandas": "2.3.3",
+    "numpy": "2.5.5"
   }
 }

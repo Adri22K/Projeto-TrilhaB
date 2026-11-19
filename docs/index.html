@@ -32,12 +32,11 @@
         <p class="eyebrow">CADENC.IA · Mostra Tecnológica · Centro Universitário Braz Cubas</p>
         <h1><span class="wordmark">CADENC<span class="brand-dot">.</span><span class="brand-ia">IA</span></span><span class="hero-title-sub">O ritmo do ar</span></h1>
         <p class="hero-lead">Como estará o ar daqui a 24 horas? O CADENC.IA investiga essa pergunta usando dados ambientais e aprendizado de máquina para prever períodos de qualidade do ar inadequada em São Paulo.</p>
-        <div class="meta-line"><span>Publicado: <strong>28 out. 2026</strong></span><span>Última revisão: <strong>17 dez. 2026</strong></span></div>
+        <div class="meta-line"><span>Publicado: <strong>28 out. 2026</strong></span><span>Última revisão: <strong>29 out. 2026</strong></span></div>
         <div class="hero-actions">
           <a class="button button-primary" href="#resultados">Conhecer os resultados</a>
           <a class="button button-secondary" href="https://github.com/Adri22K/Projeto-TrilhaB" target="_blank" rel="noopener noreferrer">Explorar repositório</a>
-          <a class="button button-secondary" href="https://projeto-cadencia.streamlit.app/" target="_blank" rel="noopener noreferrer"> Acessar dashboard </a>    
-          <a class="button button-secondary" href="https://act-frill-79350993.figma.site/" target="_blank" rel="noopener noreferrer"> Conheça o protótipo </a>   
+        </div>
       </div>
       <aside class="hero-note">
         <img class="hero-logo" src="assets/cadencia-logo-clara.png" alt="Logo CADENC.IA em fundo claro, com pessoa correndo, linhas de vento, sol laranja e referência visual ao MASP">
@@ -88,13 +87,6 @@
           <p>O conjunto cobre o período de 6 de setembro de 2024 a 6 de setembro de 2026. Foram reunidos PM10, PM2,5, CO, NO₂, SO₂ e O₃, além de temperatura, precipitação e velocidade do vento. Os dados da Open-Meteo são baseados em modelos e reanálises, portanto não equivalem a medições diretas de uma estação em cada rua ou bairro.</p>
           <h3>O que chamamos de “qualidade do ar inadequada”?</h3>
           <p>O problema foi definido como classificação binária: adequada ou inadequada. A classe positiva representa uma condição prevista para 24 horas depois, marcada quando pelo menos um dos poluentes alcança a categoria N3 — “Ruim” — ou uma condição pior, segundo os limites documentados no dicionário de dados do projeto.</p>
-          <h3>Que tipo de aprendizado usamos?</h3>
-          <p>O CADENC.IA utiliza <strong>aprendizado de máquina supervisionado</strong>, em uma tarefa de <strong>classificação binária</strong>. Isso significa que o treinamento utiliza exemplos históricos acompanhados de uma resposta conhecida: qualidade do ar adequada (classe 0) ou inadequada (classe 1).</p>
-          <div class="stat-row">
-            <div class="stat"><strong>X</strong><span>25 atributos de entrada: informações ambientais, meteorológicas e temporais</span></div>
-            <div class="stat"><strong>Y</strong><span><code>qualidade_inadequada_24h</code>: classe prevista 24 horas à frente</span></div>
-          </div>
-          <p>Em termos simples, <strong>X</strong> reúne as informações que o modelo recebe para fazer a previsão; <strong>Y</strong> é a resposta que ele aprende a estimar. A classe 1 é atribuída quando pelo menos um poluente alcança N3 (“Ruim”) ou pior no horizonte futuro definido. A classe 0 representa as demais situações.</p>
         </section>
 
         <section id="pipeline">
@@ -121,28 +113,6 @@
             <figcaption>Figura 1. Visão resumida das etapas do pipeline de dados e modelagem. Diagrama original do projeto.</figcaption>
           </figure>
           <p>Também criamos atributos temporais, como hora do dia, dia da semana, mês e valores anteriores das variáveis. Para respeitar a ordem natural dos dados, o período mais antigo é usado no treinamento e o período mais recente fica reservado para teste. Não devemos embaralhar registros temporais como se fossem observações independentes.</p>
-          <h3>Como a previsão olha para o futuro?</h3>
-          <figure class="diagram">
-            <svg viewBox="0 0 900 190" role="img" aria-labelledby="future-title future-desc">
-              <title id="future-title">Previsão da qualidade do ar 24 horas à frente</title>
-              <desc id="future-desc">As variáveis de entrada são observadas no instante t; o rótulo usado no treinamento corresponde à condição de qualidade do ar em t mais 24 horas.</desc>
-              <g font-family="Arial, sans-serif" text-anchor="middle">
-                <rect x="55" y="38" width="300" height="105" rx="14" fill="#e8eef0" stroke="#b8c7cd" stroke-width="2"/>
-                <text x="205" y="72" font-size="18" fill="#20343d">Instante t</text>
-                <text x="205" y="101" font-size="16" fill="#52636b">Atributos disponíveis</text>
-                <text x="205" y="123" font-size="14" fill="#52636b">X: dados ambientais e temporais</text>
-                <path d="M365 90 H525" stroke="#73838b" stroke-width="3"/>
-                <path d="M515 81 L528 90 L515 99" fill="none" stroke="#73838b" stroke-width="3"/>
-                <text x="445" y="70" font-size="16" fill="#087e78">+ 24 horas</text>
-                <rect x="545" y="38" width="300" height="105" rx="14" fill="#dceee7" stroke="#9dcbbb" stroke-width="2"/>
-                <text x="695" y="72" font-size="18" fill="#173b49">Instante t + 24h</text>
-                <text x="695" y="101" font-size="16" fill="#315d55">Rótulo conhecido no histórico</text>
-                <text x="695" y="123" font-size="14" fill="#315d55">Y: adequada (0) ou inadequada (1)</text>
-              </g>
-            </svg>
-            <figcaption>Figura 2. No treinamento, cada conjunto de atributos em t é associado à classificação observada 24 horas depois. Em uso preditivo, o modelo recebe apenas os atributos disponíveis no instante da previsão.</figcaption>
-          </figure>
-          <p>Assim, o modelo não tenta classificar a condição do ar no mesmo instante das entradas: ele aprende a relação entre os atributos disponíveis em <code>t</code> e o rótulo correspondente a <code>t + 24h</code>. A separação cronológica e a purga temporal ajudam a reduzir o risco de vazamento de informação entre treino e teste.</p>
         </section>
 
         <section id="modelos">
@@ -182,9 +152,6 @@
           </figure>
           <h3>XGBoost — modelo final</h3>
           <p>O XGBoost combina árvores de decisão em sequência para capturar interações entre variáveis. No projeto ele usa as 25 features congeladas na Sprint 4, com imputação pela mediana e transformação Yeo-Johnson. O limiar final é <strong>0,20</strong>, escolhido pelo máximo F₂ na validação temporal dentro do treino.</p>
-          <h3>Quais informações entram no modelo?</h3>
-          <p>As 25 features congeladas na Sprint 4 reúnem grupos de informações: concentrações e históricos recentes de poluentes selecionados, variáveis meteorológicas, estatísticas em janelas temporais e atributos derivados de hora, mês e contexto solar. O timestamp bruto é importante para ordenar e alinhar a série temporal; a representação temporal usada pelo modelo é feita por atributos derivados.</p>
-          <p>Nem todas as colunas disponíveis na base original entram no treinamento. A seleção de atributos define quais informações serão efetivamente fornecidas ao classificador, enquanto a coluna-alvo permanece separada como <code>Y</code>.</p>
           <h3>Outros modelos comparados</h3>
           <p>O comparativo final também inclui Gaussian Naive Bayes, Regressão Logística, Árvore de Decisão, Random Forest e HistGradientBoosting, além dos baselines Dummy e persistência temporal. Todos respeitam o mesmo split temporal e, quando aplicável, o mesmo pré-processamento congelado da Sprint 4.</p>
           <h3>Quadro comparativo</h3>
@@ -227,18 +194,6 @@
             </table>
           </div>
           <p class="small-note">Retreinamento de 18/11/2026: teste histórico com 3.480 horas, sendo 299 positivas. Os limiares dos modelos supervisionados foram congelados na validação temporal dentro do treino. Os resultados completos estão em <code>reports/sprint5/comparativo_teste.csv</code>.</p>
-          <h3>Como o XGBoost classificou os registros?</h3>
-          <p>A matriz de confusão mostra a comparação entre a classe real e a classe prevista pelo XGBoost no teste histórico, usando o limiar 0,20.</p>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Classe real</th><th>Previsto: adequada (0)</th><th>Previsto: inadequada (1)</th></tr></thead>
-              <tbody>
-                <tr><th>Adequada (0)</th><td><strong>2.608</strong><br>Verdadeiros negativos</td><td><strong>573</strong><br>Falsos positivos</td></tr>
-                <tr><th>Inadequada (1)</th><td><strong>81</strong><br>Falsos negativos</td><td><strong>218</strong><br>Verdadeiros positivos</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p>O modelo identificou 218 das 299 horas inadequadas do teste (recall de 72,91%). As 81 ocorrências restantes são falsos negativos; os 573 falsos positivos representam alertas emitidos para horas que foram classificadas como adequadas na referência.</p>
           <div class="stat-row">
             <div class="stat"><strong>72,91%</strong><span>Recall do modelo final no teste</span></div>
             <div class="stat"><strong>81</strong><span>Falsos negativos do modelo final no teste</span></div>
@@ -276,8 +231,6 @@ python src/sprint5_modelos.py</code></pre>
             <li>O experimento se limita à localização e ao período selecionados; não avalia o risco individual de saúde.</li>
             <li>O modelo final apresenta 81 falsos negativos no teste. Entre as 91 horas positivas associadas a MP2,5, 60 não foram detectadas; a família de MP2,5 não permaneceu entre as features finais da Sprint 4.</li>
             <li>O modelo gera 573 falsos positivos no teste, distribuídos em 140 grupos de erros consecutivos.</li>
-            <li>Os atributos temporais podem ajudar a representar padrões sazonais e horários, mas também podem introduzir dependência de padrões recorrentes. A auditoria por faixa horária encontrou diferenças de desempenho; isso não prova causalidade nem elimina a possibilidade de viés temporal.</li>
-            <li>Variáveis ambientais podem apresentar correlação entre si e compartilhar informação. A correlação observada na análise exploratória não implica causalidade e deve ser interpretada junto à seleção das 25 features finais.</li>
             <li>Os escores do XGBoost não são calibrados e não devem ser interpretados como uma chance real de ocorrência.</li>
             <li>Uma operação real exigiria dados de previsão meteorológica no momento da inferência; o experimento foi treinado com reanálise histórica.</li>
             <li>O dashboard previsto para a Mostra é apenas demonstrativo e não representa uma aplicação operacional contínua.</li>
@@ -308,7 +261,7 @@ python src/sprint5_modelos.py</code></pre>
       <div>
         <h2>CADENC.IA</h2>
         <p>Artigo técnico acadêmico · Centro Universitário Braz Cubas</p>
-        <p>Última revisão: 19 de novembro de 2026</p>
+        <p>Última revisão: 29 de outubro de 2026</p>
       </div>
       <div>
         <h3>Autores</h3>

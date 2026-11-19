@@ -3,11 +3,11 @@ Decision Tree,Decision Tree (Limiar Padrao 0.50),0.5,0,0.9724,0.8623,0.914,3181
 Decision Tree,Decision Tree (Limiar Padrao 0.50),0.5,1,0.3354,0.7391,0.4614,299
 Decision Tree,Decision Tree (Limiar F2 0.35),0.35,0,0.9739,0.8444,0.9045,3181
 Decision Tree,Decision Tree (Limiar F2 0.35),0.35,1,0.3144,0.7592,0.4447,299
-Random Forest,Random Forest (Limiar Padrao 0.50),0.5,0,0.9636,0.9157,0.9391,3181
-Random Forest,Random Forest (Limiar Padrao 0.50),0.5,1,0.4136,0.6321,0.5,299
-Random Forest,Random Forest (Limiar F2 0.40),0.4,0,0.9661,0.8969,0.9302,3181
-Random Forest,Random Forest (Limiar F2 0.40),0.4,1,0.3776,0.6656,0.4818,299
-XGBoost,XGBoost (Limiar Padrao 0.50),0.5,0,0.9591,0.9211,0.9397,3181
-XGBoost,XGBoost (Limiar Padrao 0.50),0.5,1,0.4094,0.5819,0.4807,299
-XGBoost,XGBoost (Limiar F2 0.25),0.25,0,0.9718,0.8346,0.898,3181
-XGBoost,XGBoost (Limiar F2 0.25),0.25,1,0.2968,0.7425,0.4241,299
+Random Forest,Random Forest (Limiar Padrao 0.50),0.5,0,0.9643,0.9082,0.9354,3181
+Random Forest,Random Forest (Limiar Padrao 0.50),0.5,1,0.3967,0.6421,0.4904,299
+Random Forest,Random Forest (Limiar F2 0.30),0.3,0,0.9749,0.8441,0.9048,3181
+Random Forest,Random Forest (Limiar F2 0.30),0.3,1,0.3168,0.7692,0.4488,299
+XGBoost,XGBoost (Limiar Padrao 0.50),0.5,0,0.9594,0.9205,0.9395,3181
+XGBoost,XGBoost (Limiar Padrao 0.50),0.5,1,0.4089,0.5853,0.4814,299
+XGBoost,XGBoost (Limiar F2 0.20),0.2,0,0.9737,0.8019,0.8795,3181
+XGBoost,XGBoost (Limiar F2 0.20),0.2,1,0.2674,0.7692,0.3969,299

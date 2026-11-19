@@ -244,6 +244,13 @@ def main() -> None:
     inspection = inspect_raw(raw, sprint2["sentinels"])
     cleaned, cleaning_log = clean(raw, sprint2["sentinels"])
 
+    # Lags e alvo por posição só representam horas em uma grade completa.
+    # Ausência de concentração não equivale a qualidade adequada.
+    if cleaned.empty or not cleaned["timestamp"].diff().iloc[1:].eq(pd.Timedelta(hours=1)).all():
+        raise ValueError("Grade horária histórica incompleta: corrigir a coleta antes de treinar")
+    if cleaned[POLLUTANTS + WEATHER].isna().any().any():
+        raise ValueError("Dados históricos ausentes ou inválidos: corrigir a coleta antes de construir o alvo")
+
     INTERIM_DIR.mkdir(parents=True, exist_ok=True)
     cleaned.to_csv(INTERIM_DIR / "integrado_limpo.csv", index=False, encoding="utf-8")
     train, test, cutoff = temporal_split(cleaned, sprint2["test_fraction"])

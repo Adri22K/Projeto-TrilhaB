@@ -151,11 +151,11 @@ def existing_outputs_complete(paths: dict[str, Path], overwrite: bool) -> bool:
     )
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--overwrite", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     config = load_config(args.config)
     period_tag = (

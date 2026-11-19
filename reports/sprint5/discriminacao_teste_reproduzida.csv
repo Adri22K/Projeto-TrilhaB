@@ -1,0 +1,7 @@
+modelo,hiperparametros,limiar_validacao,roc_auc,average_precision
+Naive Bayes,padrao,0.2,0.8137162647365893,0.43002615787340487
+Regressao Logistica,C=0.01,0.5,0.8403364878632432,0.4507590309350231
+Decision Tree,max_depth=4,0.35,0.8361939988581871,0.39603408880913155
+Random Forest,"max_depth=12, min_samples_leaf=8",0.35,0.8957102108148403,0.49202761809585144
+HistGradientBoosting,"learning_rate=0.05, max_depth=4",0.1,0.842071286558254,0.4348911246964962
+XGBoost,"learning_rate=0.03, max_depth=4",0.2,0.8716532841842084,0.4817492369529767

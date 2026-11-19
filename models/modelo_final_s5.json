@@ -1,6 +1,6 @@
 {
-  "modelo": "Naive Bayes",
-  "hiperparametros": "padrao",
+  "modelo": "XGBoost",
+  "hiperparametros": "learning_rate=0.03, max_depth=4",
   "limiar": 0.2,
   "origem_limiar": "max F2 na validacao temporal (3 janelas dentro do treino)",
   "features": [
@@ -31,7 +31,8 @@
     "elevacao_solar_alvo"
   ],
   "normalizacao": "yeo_johnson",
-  "random_state": null,
+  "random_state": 42,
   "corte_split": "2026-04-14 00:00:00",
-  "sklearn": "1.8.0"
+  "sklearn": "1.9.1",
+  "regra_selecao": "maior recall da classe 1 na validacao temporal, com limiares max F2; F2 >= persistencia; desempate por F2 e ordem de simplicidade"
 }

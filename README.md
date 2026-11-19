@@ -225,9 +225,9 @@ Dicionário: `docs/Dicionario_de_Dados.md`
 
 Baseline (Sprint 3, teste medido uma vez, sem ajuste de limiar): persistência temporal — recall 0,48 na classe 1 (145 de 299 horas inadequadas detectadas; 154 FN, 157 FP). Gaussian Naive Bayes: recall 0,40 (180 FN). DummyClassifier: recall 0 (299 FN), apesar de 91% de acurácia.
 Sprint 4 (features novas + pipeline congelado, mesmo split): Naive Bayes subiu de recall 0,40 para 0,63 e de F1 0,33 para 0,47 (FN 180 → 112). Persistência e Dummy não mudam (regra fixa e classe majoritária). Pipeline congelado: 25 features, mediana + Yeo-Johnson, em `models/column_transformer_s4.joblib`.
-Modelo final (Sprint 5): **Gaussian Naive Bayes** no pipeline congelado da Sprint 4 (25 features, mediana + Yeo-Johnson), em `models/modelo_final_s5.joblib`. Foram comparados 7 modelos no mesmo teste: Dummy, persistência, NB, Regressão Logística, Decision Tree, Random Forest e HistGradientBoosting. NB e Regressão Logística empataram na validação (F2 de 0,740 e 0,744), e a regra registrada antes do teste escolheu o mais simples.
-Limiar (escolhido na validação) e por quê: **0,20**, o máximo F2 nas 3 janelas de validação temporal dentro do treino. O F2 dá ao recall o dobro do peso, porque o falso negativo expõe o atleta ao ar ruim, enquanto o falso positivo só troca o horário do treino.
-Métrica principal na classe positiva (teste, uma vez): **recall 0,682** (204 de 299 horas ruins detectadas), precisão 0,311, F2 0,550, **95 FN** e 453 FP. Persistência: recall 0,485, 154 FN. Model card: `docs/Model_Card.md`.
+Modelo final (Sprint 5, política revisada em 18/11/2026): **XGBoost** no pipeline congelado da Sprint 4 (25 features, mediana + Yeo-Johnson), em `models/modelo_final_s5.joblib`. Oito alternativas: Dummy, persistência, NB, Regressão Logística, Decision Tree, Random Forest, HistGradientBoosting e XGBoost. Seleção pelo maior recall da classe inadequada na validação temporal, entre alternativas com F2 igual ou superior ao da persistência; desempate por F2 e simplicidade. XGBoost: recall 89,74%, F2 0,7316.
+Limiar: **0,20**, máximo F2 nas três janelas de validação temporal dentro do treino. Beta=2 favorece recall (beta²=4 na fórmula), sem equivalência automática a custo clínico.
+Teste histórico: **recall 72,91%** (218 de 299 horas inadequadas detectadas), precisão 0,276, F2 0,5486, **81 FN**, 573 FP e 2.608 TN. Decision Tree teve maior recall no teste (75,92%) e Random Forest maior ROC-AUC (0,8957). O teste já era conhecido quando a política foi revisada; é necessária validação prospectiva independente. Model card: `docs/Model_Card.md`.
 
 ## Documentação
 
@@ -268,3 +268,7 @@ Métrica principal na classe positiva (teste, uma vez): **recall 0,682** (204 de
 | `Dicionario_de_Dados_Template.md` | Equipe 2 |
 | `Sprint{1–5}_TrilhaB.md` | Grupo na Trilha B |
 | `Sprint{1–5}_TrilhaC.md` | Grupo na Trilha C |
+
+## Revisão de 18/11/2026
+
+O comparativo oficial retreinado em 18/11 inclui XGBoost (limiar 0,20; recall 72,91%; 81 FN). Para X/y/Z, recortes de horário, diferenças de protocolo e estado do retreinamento, consulte [spec](specs-dash/revisao_integral_sprints_modelos_dashboard.md) e [relatório](specs-dash/RELATORIO_REVISAO_CORRECOES_2026-11-18.md).

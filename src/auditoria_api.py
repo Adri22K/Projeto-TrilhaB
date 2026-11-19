@@ -10,10 +10,13 @@ obter a previsao para as 24 horas seguintes e auditar detalhadamente se a previs
 from __future__ import annotations
 
 import datetime
+from concurrent.futures import ThreadPoolExecutor
+import logging
 import os
 from pathlib import Path
 import time
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import joblib
 import numpy as np
@@ -21,6 +24,7 @@ import pandas as pd
 import psutil
 import requests
 import yaml
+from limiares_modelos import limiar_para_modelo
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_FILE = ROOT / "config/params.yaml"
@@ -30,6 +34,7 @@ LON = -46.6388
 TIMEZONE = "America/Sao_Paulo"
 UTC_OFFSET_H = -3
 HORIZON_H = 24
+LOGGER = logging.getLogger(__name__)
 
 FROZEN_FEATURES = [
     "pm10",
@@ -58,13 +63,6 @@ FROZEN_FEATURES = [
     "mes_cos",
     "elevacao_solar_alvo",
 ]
-
-THRESHOLDS_MODELOS = {
-    "Decision Tree": 0.35,
-    "Random Forest": 0.40,
-    "XGBoost": 0.25,
-    "Persistência Temporal": 0.50,
-}
 
 CETESB_THRESHOLDS = {
     "pm10_24h": 100.0,
@@ -130,12 +128,14 @@ def consultar_api_open_meteo(data_alvo: str | datetime.date, hora_inicio: int = 
 
     dt_inicio = dt_alvo - datetime.timedelta(days=2)
     dt_fim = dt_alvo + datetime.timedelta(days=2)
+    agora_local = datetime.datetime.now(ZoneInfo(TIMEZONE))
+    # O arquivo histórico pode ter atraso de dias; a previsão cobre o período recente.
+    usar_previsao_clima = dt_alvo >= agora_local.date() - datetime.timedelta(days=5)
 
     str_inicio = dt_inicio.strftime("%Y-%m-%d")
     str_fim = dt_fim.strftime("%Y-%m-%d")
 
-    # 1. Qualidade do ar
-    t0_aq = time.time()
+    # As APIs são independentes: requisitá-las em paralelo reduz a espera da tela.
     url_aq = "https://air-quality-api.open-meteo.com/v1/air-quality"
     params_aq = {
         "latitude": LAT,
@@ -145,44 +145,43 @@ def consultar_api_open_meteo(data_alvo: str | datetime.date, hora_inicio: int = 
         "hourly": "pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone",
         "timezone": TIMEZONE,
     }
-    resp_aq = requests.get(url_aq, params=params_aq, timeout=25)
-    latencia_aq_ms = int((time.time() - t0_aq) * 1000)
-
-    if resp_aq.status_code != 200:
-        raise RuntimeError(f"Erro na API de Qualidade do Ar ({resp_aq.status_code}): {resp_aq.text}")
-
-    dados_aq = resp_aq.json()["hourly"]
-    df_aq = pd.DataFrame(dados_aq)
-    df_aq["timestamp"] = pd.to_datetime(df_aq["time"])
-    df_aq = df_aq.drop(columns=["time"])
-
-    # 2. Clima / Meteorologia (Tenta Archive; fallback para Forecast)
-    t0_w = time.time()
-    url_weather = "https://archive-api.open-meteo.com/v1/archive"
+    url_weather = (
+        "https://api.open-meteo.com/v1/forecast" if usar_previsao_clima
+        else "https://archive-api.open-meteo.com/v1/archive"
+    )
     params_w = {
         "latitude": LAT,
         "longitude": LON,
         "start_date": str_inicio,
         "end_date": str_fim,
         "hourly": "temperature_2m,precipitation,wind_speed_10m",
+        "wind_speed_unit": "kmh",
         "timezone": TIMEZONE,
     }
-    resp_w = requests.get(url_weather, params=params_w, timeout=25)
-    if resp_w.status_code != 200:
-        url_weather = "https://api.open-meteo.com/v1/forecast"
-        resp_w = requests.get(url_weather, params=params_w, timeout=25)
-        if resp_w.status_code != 200:
-            raise RuntimeError(f"Erro na API Meteorologica ({resp_w.status_code}): {resp_w.text}")
-    latencia_weather_ms = int((time.time() - t0_w) * 1000)
+    def obter(nome: str, url: str, params: dict) -> tuple[pd.DataFrame, int, int]:
+        inicio = time.monotonic()
+        resposta = requests.get(url, params=params, timeout=25)
+        latencia = int((time.monotonic() - inicio) * 1000)
+        if resposta.status_code != 200:
+            raise RuntimeError(f"Erro na API de {nome} ({resposta.status_code}): {resposta.text[:350]}")
+        horario = resposta.json().get("hourly")
+        if not horario or "time" not in horario:
+            raise ValueError(f"API de {nome} não retornou dados horários válidos.")
+        df = pd.DataFrame(horario)
+        df["timestamp"] = pd.to_datetime(df.pop("time"))
+        return df, latencia, resposta.status_code
 
-    dados_w = resp_w.json()["hourly"]
-    df_w = pd.DataFrame(dados_w)
-    df_w["timestamp"] = pd.to_datetime(df_w["time"])
-    df_w = df_w.drop(columns=["time"])
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        aq = executor.submit(obter, "Qualidade do Ar", url_aq, params_aq)
+        clima = executor.submit(obter, "Meteorologia", url_weather, params_w)
+        df_aq, latencia_aq_ms, status_aq = aq.result()
+        df_w, latencia_weather_ms, status_clima = clima.result()
 
     # Merge
-    df_bruto = pd.merge(df_aq, df_w, on="timestamp", how="inner")
-    latencia_total_ms = latencia_aq_ms + latencia_weather_ms
+    df_bruto = pd.merge(df_aq, df_w, on="timestamp", how="inner", validate="one_to_one")
+    if df_bruto.empty:
+        raise ValueError("As APIs não retornaram horas coincidentes no período solicitado.")
+    latencia_total_ms = max(latencia_aq_ms, latencia_weather_ms)
 
     # Recursos de memoria
     recursos = medir_recursos_sistema()
@@ -196,8 +195,12 @@ def consultar_api_open_meteo(data_alvo: str | datetime.date, hora_inicio: int = 
         "latencia_aq_ms": latencia_aq_ms,
         "latencia_weather_ms": latencia_weather_ms,
         "latencia_total_ms": latencia_total_ms,
-        "status_code_aq": resp_aq.status_code,
-        "status_code_weather": resp_w.status_code,
+        "status_code_aq": status_aq,
+        "status_code_weather": status_clima,
+        "consulta_realizada_em": agora_local.strftime("%d/%m/%Y às %H:%M"),
+        "fonte_meteorologia": "Open-Meteo Forecast" if usar_previsao_clima else "Open-Meteo Archive",
+        "referencia_historica": not usar_previsao_clima,
+        "ultima_hora_api": df_bruto["timestamp"].max().strftime("%d/%m/%Y às %H:%M"),
         "recursos": recursos,
     }
 
@@ -233,8 +236,8 @@ def validar_sanidade_dados(df: pd.DataFrame) -> dict[str, Any]:
         anomalias_fisicas.append("PM2.5 > 500 ug/m³ detectado")
     if (df["temperature_2m"] < -10).any() or (df["temperature_2m"] > 50).any():
         anomalias_fisicas.append("Temperatura fora da faixa esperada (-10°C a 50°C)")
-    if (df["wind_speed_10m"] > 60).any():
-        anomalias_fisicas.append("Vento > 60 m/s detectado")
+    if (df["wind_speed_10m"] > 216).any():
+        anomalias_fisicas.append("Vento > 216 km/h detectado")
 
     dados_integros = (total_nulos == 0) and (sentinela_count == 0) and (len(negativos) == 0) and (len(anomalias_fisicas) == 0)
 
@@ -246,7 +249,7 @@ def validar_sanidade_dados(df: pd.DataFrame) -> dict[str, Any]:
         "sentinelas_detectadas": sentinela_count,
         "negativos_invalidos": negativos,
         "anomalias_fisicas": anomalias_fisicas,
-        "status_texto": "✅ Dados 100% Íntegros e Validados" if dados_integros else "⚠️ Dados com Alertas de Sanidade",
+        "status_texto": "Dados 100% Íntegros e Validados" if dados_integros else "Dados com Alertas de Sanidade",
     }
 
 
@@ -254,6 +257,7 @@ def extrair_features_e_alvo(
     df_bruto: pd.DataFrame,
     data_alvo: str | datetime.date,
     hora_inicio: int = 0,
+    referencia_historica: bool = False,
     *args,
     **kwargs,
 ) -> dict[str, Any]:
@@ -264,6 +268,11 @@ def extrair_features_e_alvo(
         str_alvo = data_alvo.strftime("%Y-%m-%d")
 
     df = df_bruto.sort_values("timestamp").reset_index(drop=True).copy()
+    if df.empty or df["timestamp"].duplicated().any():
+        raise ValueError("Série horária vazia ou com timestamps duplicados")
+    # Uma hora ausente não pode deslocar lags ou o horizonte real de 24h.
+    grade = pd.date_range(df["timestamp"].min(), df["timestamp"].max(), freq="h", name="timestamp")
+    df = df.set_index("timestamp").reindex(grade).reset_index()
 
     # Tratamento de sentinelas e negativos
     numeric_cols = [c for c in df.columns if c != "timestamp"]
@@ -273,7 +282,15 @@ def extrair_features_e_alvo(
     for c in ["pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide", "sulphur_dioxide", "ozone", "precipitation", "wind_speed_10m"]:
         df[c] = df[c].mask(df[c] < 0)
 
-    df[numeric_cols] = df[numeric_cols].ffill().bfill()
+    validos_brutos = df[[
+        "pm10", "pm2_5", "carbon_monoxide", "nitrogen_dioxide",
+        "sulphur_dioxide", "ozone", "temperature_2m", "wind_speed_10m", "precipitation",
+    ]].notna().all(axis=1)
+    # Sem uma janela de 24h completa, não é seguro classificar o ar como adequado.
+    df["dados_validos"] = validos_brutos.rolling(24, min_periods=24).sum().eq(24)
+    df["features_validas"] = validos_brutos.rolling(48, min_periods=48).sum().eq(48)
+    # Preenchimento apenas com horas anteriores; não usar horas futuras como passado.
+    df[numeric_cols] = df[numeric_cols].ffill()
 
     # 1. Regras CETESB N3 para cada poluente
     o3_8h = df["ozone"].rolling(8, min_periods=8).mean()
@@ -312,8 +329,9 @@ def extrair_features_e_alvo(
     df["poluente_critico_agora"] = [definir_responsavel(i) for i in range(len(df))]
 
     # Ground truth no horizonte t + 24 h
-    df["qualidade_inadequada_24h"] = df["estado_atual"].shift(-HORIZON_H)
-    df["poluente_critico_24h"] = df["poluente_critico_agora"].shift(-HORIZON_H)
+    futuro_valido = df["dados_validos"].shift(-HORIZON_H, fill_value=False)
+    df["qualidade_inadequada_24h"] = df["estado_atual"].shift(-HORIZON_H).where(futuro_valido)
+    df["poluente_critico_24h"] = df["poluente_critico_agora"].shift(-HORIZON_H).where(futuro_valido)
 
     # 2. Construcao das 25 features congeladas
     for col in ["pm10", "sulphur_dioxide", "precipitation", "wind_speed_10m"]:
@@ -348,8 +366,19 @@ def extrair_features_e_alvo(
     df_dia_completo = df[df["timestamp"].dt.strftime("%Y-%m-%d") == str_alvo].copy()
 
     # Verifica disponibilidade de ground truth observado
-    tem_gt_t0_24h = bool(len(linha_t0) > 0 and pd.notna(linha_t0["qualidade_inadequada_24h"].iloc[0]))
-    tem_gt_janela = bool(len(df_janela_24h) == 24 and df_janela_24h["estado_atual"].notna().all())
+    agora = pd.Timestamp.now(tz=TIMEZONE).tz_localize(None)
+    tem_gt_t0_24h = bool(
+        referencia_historica and len(linha_t0) > 0 and t_fim_24h < agora
+        and pd.notna(linha_t0["qualidade_inadequada_24h"].iloc[0])
+        and bool(linha_t0["dados_validos"].iloc[0])
+        and bool(df.loc[df["timestamp"] == t_fim_24h, "dados_validos"].any())
+    )
+    tem_gt_janela = bool(
+        referencia_historica and len(df_janela_24h) == 24
+        and (df_janela_24h["timestamp"] + pd.Timedelta(hours=HORIZON_H) < agora).all()
+        and df_janela_24h["dados_validos"].all()
+        and df_janela_24h["qualidade_inadequada_24h"].notna().all()
+    )
 
     return {
         "df_completo": df,
@@ -361,6 +390,20 @@ def extrair_features_e_alvo(
         "tem_gt_t0_24h": tem_gt_t0_24h,
         "tem_gt_janela": tem_gt_janela,
     }
+
+
+def _entrada_modelo(df: pd.DataFrame, pipeline: Any) -> tuple[pd.DataFrame, pd.Series]:
+    """Respeita o contrato do artefato; a persistência exige apenas o estado atual."""
+    features = list(getattr(pipeline, "feature_names_in_", FROZEN_FEATURES))
+    if features == ["estado_atual"]:
+        validade = df["dados_validos"]
+    elif features == FROZEN_FEATURES:
+        validade = df.get("features_validas", df["dados_validos"])
+    else:
+        raise ValueError("Contrato de features do modelo incompatível com a consulta")
+    x = df.reindex(columns=features)
+    finitos = np.isfinite(x.apply(pd.to_numeric, errors="coerce").to_numpy(dtype=float)).all(axis=1)
+    return x, pd.Series(finitos, index=x.index) & validade.astype(bool)
 
 
 def gerar_previsao_t0(
@@ -376,41 +419,52 @@ def gerar_previsao_t0(
     t0 = row["timestamp"]
     t_alvo = t0 + pd.Timedelta(hours=24)
 
-    X = linha_t0[FROZEN_FEATURES]
-
     prevs = {}
     for nome_modelo, pipeline in modelos.items():
-        limiar = THRESHOLDS_MODELOS.get(nome_modelo, 0.50)
-        prob = float(pipeline.predict_proba(X)[0, 1])
-        pred = int(prob >= limiar)
-        prevs[nome_modelo] = {
-            "prob": prob,
-            "pred": pred,
-            "limiar": limiar,
-            "rotulo": "🚨 Inadequado (N3+)" if pred == 1 else "🟢 Adequado (N1-N2)",
-        }
+        limiar = limiar_para_modelo(nome_modelo)
+        try:
+            X, validas = _entrada_modelo(linha_t0, pipeline)
+            if not bool(validas.iloc[0]):
+                prevs[nome_modelo] = {"limiar": limiar, "rotulo": "Dados insuficientes"}
+                continue
+            prob = float(pipeline.predict_proba(X)[0, 1])
+            if not np.isfinite(prob):
+                raise ValueError("Probabilidade não finita")
+            pred = int(prob >= limiar)
+            prevs[nome_modelo] = {
+                "prob": prob,
+                "pred": pred,
+                "limiar": limiar,
+                "rotulo": "Inadequado (N3+)" if pred == 1 else "Adequado (N1-N2)",
+            }
+        except (ValueError, TypeError, AttributeError) as exc:
+            LOGGER.warning("Modelo %s indisponível: %s", nome_modelo, exc)
+            prevs[nome_modelo] = {"limiar": limiar, "rotulo": "Modelo indisponível"}
 
     # Persistencia
-    pred_pers = int(row["estado_atual"])
-    prevs["Persistência Temporal"] = {
-        "prob": float(pred_pers),
-        "pred": pred_pers,
-        "limiar": 0.50,
-        "rotulo": "🚨 Inadequado (N3+)" if pred_pers == 1 else "🟢 Adequado (N1-N2)",
-    }
+    if bool(row["dados_validos"]):
+        pred_pers = int(row["estado_atual"])
+        prevs["Persistência Temporal"] = {
+            "prob": float(pred_pers),
+            "pred": pred_pers,
+            "limiar": 0.50,
+            "rotulo": "Inadequado (N3+)" if pred_pers == 1 else "Adequado (N1-N2)",
+        }
+    else:
+        prevs["Persistência Temporal"] = {"limiar": 0.50, "rotulo": "Dados insuficientes"}
 
     real_valor = None
     real_rotulo = None
     poluente_critico = None
     if tem_gt and pd.notna(row["qualidade_inadequada_24h"]):
         real_valor = int(row["qualidade_inadequada_24h"])
-        real_rotulo = "🚨 Inadequado (N3+)" if real_valor == 1 else "🟢 Adequado (N1-N2)"
+        real_rotulo = "Inadequado (N3+)" if real_valor == 1 else "Adequado (N1-N2)"
         poluente_critico = row["poluente_critico_24h"]
 
     return {
         "t0": t0,
         "t_alvo_24h": t_alvo,
-        "condicao_atual_t0": "🚨 Inadequado (N3+)" if row["estado_atual"] == 1 else "🟢 Adequado (N1-N2)",
+        "condicao_atual_t0": ("Inadequado (N3+)" if row["estado_atual"] == 1 else "Adequado (N1-N2)") if bool(row["dados_validos"]) else "Dados insuficientes",
         "poluente_agora": row["poluente_critico_agora"],
         "temp_t0": row["temperature_2m"],
         "vento_t0": row["wind_speed_10m"],
@@ -430,57 +484,76 @@ def auditar_janela_24h_seguinte(
     tem_ground_truth: bool,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Gera tabela hora a hora para as 24 horas seguintes a t0 com predicoes e auditoria."""
-    audit_df = pd.DataFrame()
+    if df_janela.empty:
+        return pd.DataFrame(), {}
+    audit_df = pd.DataFrame(index=df_janela.index)
     audit_df["Data/Hora"] = df_janela["timestamp"].dt.strftime("%d/%m %H:00")
     audit_df["timestamp"] = df_janela["timestamp"]
+    audit_df["Alvo (+24h)"] = (df_janela["timestamp"] + pd.Timedelta(hours=HORIZON_H)).dt.strftime("%d/%m %H:00")
     audit_df["Temp (°C)"] = df_janela["temperature_2m"].round(1)
-    audit_df["Vento (m/s)"] = df_janela["wind_speed_10m"].round(1)
+    audit_df["Vento (km/h)"] = df_janela["wind_speed_10m"].round(1)
     audit_df["O₃ (ug/m³)"] = df_janela["ozone"].round(1)
     audit_df["PM2.5 (ug/m³)"] = df_janela["pm2_5"].round(1)
 
-    X = df_janela[FROZEN_FEATURES]
-
     # Previsoes dos modelos geradas em cada hora
+    probs_por_modelo = {}
     for nome_modelo, pipeline in modelos.items():
-        limiar = THRESHOLDS_MODELOS.get(nome_modelo, 0.50)
-        probs = pipeline.predict_proba(X)[:, 1]
-        preds = (probs >= limiar).astype(int)
-        audit_df[f"{nome_modelo} (Risco %)"] = (probs * 100).round(1).astype(str) + "%"
-        audit_df[f"{nome_modelo} (Previsão)"] = np.where(preds == 1, "Inadequado", "Adequado")
+        limiar = limiar_para_modelo(nome_modelo)
+        probs = pd.Series(np.nan, index=df_janela.index, dtype=float)
+        try:
+            X, mask_validas = _entrada_modelo(df_janela, pipeline)
+            if mask_validas.any():
+                calculadas = np.asarray(pipeline.predict_proba(X.loc[mask_validas])[:, 1], dtype=float)
+                if not np.isfinite(calculadas).all():
+                    raise ValueError("Probabilidade não finita")
+                probs.loc[mask_validas] = calculadas
+        except (ValueError, TypeError, AttributeError) as exc:
+            LOGGER.warning("Falha na projeção horária de %s: %s", nome_modelo, exc)
+        probs_por_modelo[nome_modelo] = probs
+        audit_df[f"{nome_modelo} (Risco %)"] = probs.map(
+            lambda valor: f"{valor * 100:.1f}%" if pd.notna(valor) else "N/D"
+        )
+        audit_df[f"{nome_modelo} (Previsão)"] = probs.map(
+            lambda valor: "Indisponível" if pd.isna(valor) else "Inadequado" if valor >= limiar else "Adequado"
+        )
 
     resumo = {}
     if tem_ground_truth:
-        y_real = df_janela["estado_atual"].astype(int).values
-        audit_df["Realidade CETESB"] = np.where(y_real == 1, "🚨 Inadequado (N3+)", "🟢 Adequado (N1-N2)")
-        audit_df["Poluente Crítico"] = df_janela["poluente_critico_agora"].values
+        y_real = df_janela["qualidade_inadequada_24h"].astype(int).values
+        audit_df["Referência retrospectiva Open-Meteo"] = np.where(y_real == 1, "Inadequado (N3+)", "Adequado (N1-N2)")
+        audit_df["Poluente Crítico"] = df_janela["poluente_critico_24h"].values
 
-        for nome_modelo, pipeline in modelos.items():
-            limiar = THRESHOLDS_MODELOS.get(nome_modelo, 0.50)
-            preds = (pipeline.predict_proba(X)[:, 1] >= limiar).astype(int)
+        for nome_modelo, probs in probs_por_modelo.items():
+            limiar = limiar_para_modelo(nome_modelo)
+            validas = probs.notna()
+            if not validas.any():
+                continue
+            preds = (probs.loc[validas].to_numpy() >= limiar).astype(int)
+            reais = df_janela.loc[validas, "qualidade_inadequada_24h"].astype(int).to_numpy()
 
-            status_col = []
-            for y_t, y_p in zip(y_real, preds):
+            status_col = pd.Series("Indisponível", index=X.index)
+            for idx, y_t, y_p in zip(X.loc[validas].index, reais, preds):
                 if y_t == 1 and y_p == 1:
-                    status_col.append("✅ Acerto (Verdadeiro Positivo 🚨)")
+                    status_col.loc[idx] = "Acerto (Verdadeiro Positivo)"
                 elif y_t == 0 and y_p == 0:
-                    status_col.append("✅ Acerto (Verdadeiro Negativo 🟢)")
+                    status_col.loc[idx] = "Acerto (Verdadeiro Negativo)"
                 elif y_t == 1 and y_p == 0:
-                    status_col.append("❌ Falso Negativo (Crítico)")
+                    status_col.loc[idx] = "Falso Negativo (Crítico)"
                 else:
-                    status_col.append("⚠️ Falso Positivo (Conservador)")
+                    status_col.loc[idx] = "Falso Positivo (Conservador)"
 
             audit_df[f"Auditoria {nome_modelo}"] = status_col
 
-            acertos = int((preds == y_real).sum())
-            total = len(y_real)
+            acertos = int((preds == reais).sum())
+            total = len(reais)
             resumo[nome_modelo] = {
                 "acertos": acertos,
                 "total": total,
                 "acuracia_pct": round(acertos / total * 100, 1) if total > 0 else 0,
-                "tp": int(((y_real == 1) & (preds == 1)).sum()),
-                "tn": int(((y_real == 0) & (preds == 0)).sum()),
-                "fp": int(((y_real == 0) & (preds == 1)).sum()),
-                "fn": int(((y_real == 1) & (preds == 0)).sum()),
+                "tp": int(((reais == 1) & (preds == 1)).sum()),
+                "tn": int(((reais == 0) & (preds == 0)).sum()),
+                "fp": int(((reais == 0) & (preds == 1)).sum()),
+                "fn": int(((reais == 1) & (preds == 0)).sum()),
             }
 
     return audit_df, resumo

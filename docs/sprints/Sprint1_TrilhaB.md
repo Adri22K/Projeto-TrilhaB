@@ -204,3 +204,9 @@ Development Team = Adrielle, Victor, João e Samir
 | Integração do bruto | 1,0 | Datas corretas, `how`/`validate` justificados, N do merge registrado, **sem limpar** | | |
 | Scrum + diário de bordo | 1,0 | Papéis, board, backlog e diário reflexivo de todos | | |
 | **Nota final da Sprint 1** | **4,0** | | **___ / 4,0** | |
+
+## Revisão de 18/11/2026
+
+Coleta histórica idempotente, com opção explícita de recoleta. As 17.544 horas integradas são dados modelados CAMS e reanálise meteorológica para um ponto de São Paulo, não medições de trânsito ou de estação CETESB. O boletim atual consulta a API separadamente e registra a origem.
+
+Consulte a [spec de revisão](../../specs-dash/revisao_integral_sprints_modelos_dashboard.md) e o [relatório de correções](../../specs-dash/RELATORIO_REVISAO_CORRECOES_2026-11-18.md).

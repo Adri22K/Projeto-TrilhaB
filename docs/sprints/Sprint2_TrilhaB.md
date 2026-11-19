@@ -154,3 +154,9 @@ João Pedro | Auxiliei na definição da variável-alvo e na engenharia inicial 
 | Engenharia de atributos | 1,0 | Janelas/lags coerentes, sem vazamento, parâmetros no treino, atributos justificados um a um | | |
 | Scrum + diário de bordo | 0,5 | Board com histórico; diário reflexivo de todos | | |
 | **Nota final da Sprint 2** | **4,0** | | **___ / 4,0** | |
+
+## Revisão de 18/11/2026
+
+Validação de grade horária completa e ausência de valores faltantes nas variáveis essenciais antes do cálculo das janelas e do alvo. X(t) contém atributos disponíveis na emissão; y(t) = estado_atual(t+24h). O arquivo intermediário contém rótulos conhecidos a posteriori na fronteira; a purga de 24 h nas Sprints 3–5 impede que entrem no ajuste. Treino efetivo: 13.992, teste: 3.480 horas, 299 positivas.
+
+Consulte a [spec de revisão](../../specs-dash/revisao_integral_sprints_modelos_dashboard.md) e o [relatório de correções](../../specs-dash/RELATORIO_REVISAO_CORRECOES_2026-11-18.md).

@@ -19,10 +19,12 @@ Como executar:
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
 import joblib
+from threadpoolctl import threadpool_limits
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -53,6 +55,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 import sprint3_baselines as s3
 import sprint4_features as s4
+from limites_treinamento import TRAINING_WORKERS  # noqa: E402
 
 TRAIN_FILE = ROOT / "data/processed/treino_features_s4.csv"
 TEST_FILE = ROOT / "data/processed/teste_features_s4.csv"
@@ -284,6 +287,7 @@ def salvar_importancia_features(
     return df_imp
 
 
+@threadpool_limits.wrap(limits=TRAINING_WORKERS)
 def main() -> dict:
     print("=" * 80)
     print("   MODELAGEM SUPERVISIONADA: DECISION TREE, RANDOM FOREST E XGBOOST")
@@ -338,7 +342,7 @@ def main() -> dict:
         min_samples_leaf=20,
         class_weight="balanced",
         random_state=SEED,
-        n_jobs=-1,
+        n_jobs=TRAINING_WORKERS,
     )
 
     if xgb is None:
@@ -359,7 +363,7 @@ def main() -> dict:
         colsample_bytree=0.8,
         random_state=SEED,
         eval_metric="logloss",
-        n_jobs=-1,
+        n_jobs=TRAINING_WORKERS,
     )
 
     # 3. Validacao Temporal Interna (3 janelas no treino sem vazamento) para calibrar limiares
@@ -452,40 +456,32 @@ def main() -> dict:
     )
 
     # 6. Quadro Comparativo Consolidado (com Baselines da Sprint 3/4)
-    linhas_tabela = [
-        {
-            "modelo": "DummyClassifier",
-            "categoria": "Piso de Acuracia",
-            "limiar": 0.50,
-            "acuracia": 0.9141,
-            "precisao_c1": 0.0000,
-            "recall_c1": 0.0000,
-            "f1_c1": 0.0000,
-            "f2_c1": 0.0000,
-            "roc_auc": 0.5000,
-            "fn": 299,
-            "fp": 0,
-            "status_aprovacao": "Reprovado (Recall zero)",
-        },
-        {
-            "modelo": "Persistencia Temporal",
-            "categoria": "Piso Real de Decisao",
-            "limiar": 0.50,
-            "acuracia": 0.9106,
-            "precisao_c1": 0.4801,
-            "recall_c1": 0.4849,
-            "f1_c1": 0.4825,
-            "f2_c1": 0.4840,
-            "roc_auc": 0.7178,
-            "fn": 154,
-            "fp": 157,
-            "status_aprovacao": "Referencia a ser batida",
-        },
-    ]
+    # Recalcular baselines no MESMO conjunto de teste, sem valores copiados
+    # de execucoes anteriores. A S4 fornece a verificacao independente.
+    esperado_s4 = pd.read_csv(ROOT / "reports/sprint4/comparativo_baselines_s4.csv").set_index("modelo")
+    pred_dummy = np.full(len(y_test), int(np.bincount(y_train_full).argmax()), dtype=float)
+    pred_persistencia = teste["estado_atual"].astype(float).to_numpy()
+    linhas_tabela = []
+    for nome, categoria, pred, referencia in (
+        ("DummyClassifier", "Piso de Acuracia", pred_dummy, "DummyClassifier"),
+        ("Persistencia Temporal", "Piso Real de Decisao", pred_persistencia, "Persistencia temporal"),
+    ):
+        metricas_base, _, _, _ = avaliar_desempenho(nome, categoria, y_test, pred, 0.50)
+        if int(metricas_base["fn"]) != int(esperado_s4.loc[referencia, "fn"]):
+            raise ValueError(f"Baseline {nome} divergiu da Sprint 4; interrompendo comparativo")
+        linhas_tabela.append({
+            "modelo": nome, "categoria": categoria,
+            **{chave: metricas_base[chave] for chave in (
+                "limiar", "acuracia", "precisao_c1", "recall_c1", "f1_c1", "f2_c1", "roc_auc",
+                "fn", "fp", "tn", "tp")},
+            "status_aprovacao": "Reprovado (Recall zero)" if nome == "DummyClassifier" else "Referencia a ser batida",
+        })
+
+    piso_recall = linhas_tabela[1]["recall_c1"]
+    piso_fn = linhas_tabela[1]["fn"]
 
     for r in resumo_modelos:
-        # Criterio de aprovacao: Recall superior ao piso de 48,49% e FN abaixo de 154
-        aprovado = (r["recall_c1"] > 0.4849) and (r["fn"] < 154)
+        aprovado = (r["recall_c1"] > piso_recall) and (r["fn"] < piso_fn)
         linhas_tabela.append({
             "modelo": r["configuracao"],
             "categoria": r["algoritmo"],
@@ -506,64 +502,81 @@ def main() -> dict:
     pd.DataFrame(classes_detalhe).round(4).to_csv(REPORT_DIR / "metricas_por_classe.csv", index=False)
     pd.concat(erros_df_list, ignore_index=True).to_csv(REPORT_DIR / "erros_detalhados_teste.csv", index=False)
 
-    # 7. Relatorio em Markdown Consolidado
+    # Publicar calibracao derivada apenas das 3 janelas temporais. O app e a
+    # inferencia leem este arquivo, associado aos pipelines da mesma execucao.
+    limiares = {
+        "Decision Tree": calib_dt["limiar_f2"],
+        "Random Forest": calib_rf["limiar_f2"],
+        "XGBoost": calib_xgb["limiar_f2"],
+    }
+    metadados = {
+        "gerado_em_utc": datetime.now(timezone.utc).isoformat(),
+        "origem": "validacao temporal OOF, 3 janelas, F2 (beta=2), sem otimizacao no teste",
+        "n_treino": len(treino), "n_teste": len(teste),
+        "corte_teste": str(CUTOFF), "horizonte_horas": HORIZON_H,
+        "features": features,
+        "limiares_f2": limiares,
+        "f2_validacao": {"Decision Tree": calib_dt["f2_val"], "Random Forest": calib_rf["f2_val"],
+                         "XGBoost": calib_xgb["f2_val"]},
+    }
+    destino_meta = MODELS_DIR / "limiares_modelos_arvore.json"
+    temporario = destino_meta.with_suffix(".json.tmp")
+    temporario.write_text(json.dumps(metadados, indent=2, ensure_ascii=False), encoding="utf-8")
+    temporario.replace(destino_meta)
+
+    # O texto gerado depende exclusivamente das metricas calculadas nesta
+    # execucao.
     linhas_relatorio = [
-        "# Avaliação e Comparativo: Decision Tree, Random Forest e XGBoost",
+        "# Comparacao reproduzivel: Decision Tree, Random Forest e XGBoost",
         "",
-        "## 1. Valores de Referência para Aprovação no Teste",
+        "> Relatorio de comparacao exploratoria. A selecao oficial de algoritmo ocorre na Sprint 5, "
+        "por F2 na validacao temporal. O teste ja foi consultado em execucoes anteriores "
+        "e nao constitui um novo conjunto cego para selecao.",
         "",
-        "Conforme estabelecido no RFC e no contrato de Engenharia de ML do projeto:",
-        "- **Dados Utilizados:** Dados tratados da **Sprint 5** (`treino_features_s4.csv` e `teste_features_s4.csv`), compostos pelas **25 features congeladas** preparadas pelo `ColumnTransformer` (mediana + Yeo-Johnson).",
-        "- **Custo Priorizado:** O **Falso Negativo (FN)** é o erro mais grave, pois classificar um horário como adequado quando está poluído (CETESB N3 - RUIM ou pior) induz a pessoa a praticar exercícios em condições prejudiciais à saúde respiratória e cardiovascular.",
-        "- **Piso 1 - Acurácia Ingênua (`DummyClassifier`):** 91,41%. Prediz apenas a classe majoritária (0), obtendo 0% de recall e **299 Falsos Negativos**. Não serve como modelo de previsão.",
-        "- **Piso 2 - Regra Operacional de Referência (`Persistência Temporal`):** É o baseline real da Sprint 3/4. Obtém **Recall de 48,49%**, **F1-Score de 0,4825** e **154 Falsos Negativos**.",
-        "- **Critério de Aprovação dos Modelos de ML:** Para justificar a complexidade de algoritmos de Machine Learning, o modelo deve obrigatoriamente superar a Persistência Temporal na classe positiva, alcançando **Recall > 48,49%** e reduzindo o teto de erro para **FN < 154**.",
+        f"- Treino purgado: {len(treino)} observacoes; teste: {len(teste)} horas, "
+        f"{int(y_test.sum())} positivas e {int((y_test == 0).sum())} negativas.",
+        f"- Matriz X: {len(features)} features congeladas em `config/params.yaml`, "
+        "com dados ate o instante t; y = classificacao do ar em t+24h (CETESB N3+).",
+        "- Z: matriz numerica de X apos imputacao de medianas e transformacao Yeo-Johnson "
+        "ajustadas somente no treino. Z nao e um alvo adicional.",
+        "- Os limiares foram escolhidos nas janelas de validacao (F2), sem escolha pelo teste.",
+        "- Fonte dos baselines: recalculo a partir de `teste_features_s4.csv`, "
+        "conferido contra `reports/sprint4/comparativo_baselines_s4.csv`.",
         "",
-        "## 2. Quadro Comparativo Consolidado no Teste",
+        "## Metricas no mesmo teste",
         "",
-        "| Modelo | Categoria | Limiar | Acurácia | Precisão (C1) | Recall (C1) | F1-Score (C1) | F2-Score (C1) | ROC-AUC | FN (Custo Alto) | FP | Status no Teste |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+        "| Modelo | Limiar | Acuracia | Precisao | Recall | F1 | F2 | ROC-AUC | FN | FP |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for _, row in df_comparativo.iterrows():
         linhas_relatorio.append(
-            f"| {row['modelo']} | {row['categoria']} | {row['limiar']:.2f} | "
-            f"{row['acuracia']:.2%} | {row['precisao_c1']:.4f} | {row['recall_c1']:.2%} | "
-            f"{row['f1_c1']:.4f} | {row['f2_c1']:.4f} | {row['roc_auc']:.4f} | **{row['fn']}** | {row['fp']} | **{row['status_aprovacao']}** |"
+            f"| {row['modelo']} | {row['limiar']:.2f} | {row['acuracia']:.4f} | "
+            f"{row['precisao_c1']:.4f} | {row['recall_c1']:.4f} | "
+            f"{row['f1_c1']:.4f} | {row['f2_c1']:.4f} | {row['roc_auc']:.4f} | "
+            f"{int(row['fn'])} | {int(row['fp'])} |"
         )
-
-    linhas_relatorio += [
-        "",
-        "## 3. Diferenciação Entre os Três Algoritmos de Árvores e Ensembles",
-        "",
-        "### A. Decision Tree (Árvore de Decisão)",
-        "- **Conceito:** Modelo único e determinístico baseado em divisões ortogonais consecutivas do espaço de atributos.",
-        "- **Vantagens:** Alta interpretabilidade visual; permite extrair regras claras no formato `se [hora_cos >= -0.7 e ozone_media_8h > 115] então...`.",
-        "- **Desempenho no Teste (Sprint 5):** Com o limiar padrão (0,50), obteve **Recall de 73,91%** e **78 FNs** (eliminando 76 FNs em relação à persistência). Com limiar calibrado em $F_2 = 0,35$, alcançou **Recall de 75,92%** e **72 FNs**.",
-        "",
-        "### B. Random Forest (Floresta Aleatória)",
-        "- **Conceito:** Ensemble de múltiplas Árvores de Decisão (200 árvores) combinadas por *bagging* (amostragem com reposição) e seleção aleatória de atributos a cada nó.",
-        "- **Vantagens:** Reduz a variância e a tendência de sobreajuste de árvores isoladas, produzindo estimativas de probabilidade suaves, menor taxa de alarmes falsos (apenas 268 FPs no limiar 0,50) e maior precisão.",
-        "- **Desempenho no Teste (Sprint 5):** Com limiar padrão (0,50), alcançou **Recall de 63,21%**, **F1-Score de 0,5000** e **110 FNs**. Com limiar calibrado em $F_2 = 0,40$, elevou o Recall para **66,56%** e reduziu os FNs para **100**, com **ROC-AUC de 0,9006**.",
-        "",
-        "### C. XGBoost (Extreme Gradient Boosting)",
-        "- **Conceito:** Ensemble de *boosting* sequencial de árvores rasas, onde cada nova árvore corrige os erros residuais (gradientes) das árvores anteriores, com regularização L1/L2 e tratamento de desbalanceamento via `scale_pos_weight`.",
-        "- **Vantagens:** Alta precisão de ranking de probabilidade (**ROC-AUC de 0,8869** — a mais alta entre os modelos de árvore), excelente sensibilidade à calibração de ponto de operação e capacidade de capturar padrões sutis de interações não lineares entre clima e poluentes.",
-        "- **Desempenho no Teste (Sprint 5):**",
-        "  - **Limiar Padrão (0,50):** Acurácia de **89,20%**, **Recall de 58,19%**, **F1-Score de 0,4807**, reduzindo os FNs para **125** (eliminando 29 FNs em relação à persistência) com apenas 251 alarmes falsos.",
-        "  - **Limiar Calibrado em $F_2 = 0,25$ (Foco em Falso Negativo):** Alcança **Recall de 74,25%**, detectando **222 de 299 horas inadequadas** e derrubando os FNs para apenas **77** (redução de 50% dos erros graves da persistência).",
-        "",
-        "## 4. Artefatos e Gráficos Gerados",
-        "",
-        "- `models/pipeline_decision_tree.joblib`",
-        "- `models/pipeline_random_forest.joblib`",
-        "- `models/pipeline_xgboost.joblib`",
-        "- `reports/modelos_decision_tree_random_forest/decision_tree/`",
-        "- `reports/modelos_decision_tree_random_forest/random_forest/`",
-        "- `reports/modelos_decision_tree_random_forest/xgboost/`",
+    linhas_relatorio.extend([
+        "", "## Limiar F2 escolhido exclusivamente na validacao",
+        "", "| Modelo | Limiar F2 | F2 na validacao |",
+        "|---|---:|---:|",
+        *[f"| {nome} | {limiares[nome]:.2f} | {metadados['f2_validacao'][nome]:.4f} | "
+          for nome in limiares],
+        "", "## Interpretacao e limites",
+        "", "- ROC-AUC mede ordenacao global, ao passo que recall, FN e F2 dependem do limiar.",
+        "- Horas consecutivas do mesmo episodio sao correlacionadas; nao equivalem a eventos independentes.",
+        "- O X historico e baseado em reanalise; a API futura usa previsoes meteorologicas: avaliar drift.",
+        "- Uma associacao do risco com horario de pico nao prova causalidade do trafego; "
+        "necessita analise condicionada por poluentes, clima e origem dos dados.",
+        "- A selecao de 25 features na Sprint 4 usou F1, enquanto a selecao oficial "
+        "da Sprint 5 usa F2; validar futura versao em teste cronologico independente.",
+        "- Os CSVs de treino/teste sao historicos. Somente a consulta da API ao vivo "
+        "fornece previsoes atuais, com data da consulta e limite das fontes.",
+        "", "## Artefatos",
+        "", "- `models/pipeline_{decision_tree,random_forest,xgboost}.joblib`",
+        "- `models/limiares_modelos_arvore.json`",
         "- `reports/modelos_decision_tree_random_forest/comparativo_completo_decision_tree_vs_random_forest.csv`",
-        "- `reports/modelos_decision_tree_random_forest/metricas_por_classe.csv`",
-        "- `reports/modelos_decision_tree_random_forest/erros_detalhados_teste.csv`",
-    ]
+        "- `reports/sprint5/resultado_execucao.json` (selecao oficial independente)",
+    ])
 
     (REPORT_DIR / "relatorio_decision_tree_e_random_forest.md").write_text(
         "\n".join(linhas_relatorio) + "\n", encoding="utf-8"

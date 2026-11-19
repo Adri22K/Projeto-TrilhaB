@@ -43,10 +43,12 @@ from sklearn.metrics import precision_recall_fscore_support
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PowerTransformer, StandardScaler
+from threadpoolctl import threadpool_limits
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 import sprint3_baselines as s3  # noqa: E402  (reaproveita persistencia, avaliacao e graficos)
+from limites_treinamento import TRAINING_WORKERS  # noqa: E402
 
 INTERIM_FILE = ROOT / "data/interim/integrado_limpo.csv"
 TRAIN_S2 = ROOT / "data/processed/treino_features.csv"
@@ -208,18 +210,24 @@ def backward_selection(train: pd.DataFrame, scaler: str, tol: float = 0.002):
     melhor = cv_score(train, cols(atual), scaler)
     passos = [{"normalizacao": scaler, "passo": 0, "removida": "(todas as features S2 + novas)",
                "n_features": len(cols(atual)), **melhor}]
-    while len(atual) > 1:
-        tentativas = []
-        for fam in atual:
-            resto = [f for f in atual if f != fam]
-            tentativas.append((cv_score(train, cols(resto), scaler), fam))
-        score, fam = max(tentativas, key=lambda t: (t[0]["f1_medio"], t[0]["recall_medio"]))
-        if score["f1_medio"] <= melhor["f1_medio"] + tol:
-            break
-        atual.remove(fam)
-        melhor = score
-        passos.append({"normalizacao": scaler, "passo": len(passos), "removida": fam,
-                       "n_features": len(cols(atual)), **melhor})
+    # As remocoes de uma mesma rodada sao independentes. Mantemos a ordem
+    # original dos candidatos para preservar inclusive os desempates.
+    # Cada worker usa uma unica thread nativa, evitando paralelismo aninhado.
+    with joblib.parallel_config(backend="loky", inner_max_num_threads=1):
+        with joblib.Parallel(n_jobs=TRAINING_WORKERS, pre_dispatch=TRAINING_WORKERS) as parallel:
+            while len(atual) > 1:
+                scores = parallel(
+                    joblib.delayed(cv_score)(train, cols([f for f in atual if f != fam]), scaler)
+                    for fam in atual
+                )
+                tentativas = list(zip(scores, atual))
+                score, fam = max(tentativas, key=lambda t: (t[0]["f1_medio"], t[0]["recall_medio"]))
+                if score["f1_medio"] <= melhor["f1_medio"] + tol:
+                    break
+                atual.remove(fam)
+                melhor = score
+                passos.append({"normalizacao": scaler, "passo": len(passos), "removida": fam,
+                               "n_features": len(cols(atual)), **melhor})
     return atual, cols(atual), melhor, passos
 
 
@@ -239,6 +247,7 @@ def s3_error_analysis(train: pd.DataFrame) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- principal
+@threadpool_limits.wrap(limits=TRAINING_WORKERS)
 def main() -> dict:
     config = yaml.safe_load(CONFIG_FILE.read_text(encoding="utf-8"))
     REPORT_DIR.mkdir(parents=True, exist_ok=True)

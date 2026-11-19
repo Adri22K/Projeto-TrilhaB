@@ -52,9 +52,9 @@
   "taxa_positivos_treino_utilizado": 0.13907947398513437,
   "taxa_positivos_teste": 0.08591954022988506,
   "versoes": {
-    "pandas": "2.2.3",
-    "numpy": "2.3.5",
-    "scikit_learn": "1.8.0"
+    "pandas": "2.3.3",
+    "numpy": "2.5.5",
+    "scikit_learn": "1.9.1"
   },
   "politica_vazamento": "fit so no treino; purga de 24h na fronteira; persistencia observa somente t e passado",
   "resultados": [

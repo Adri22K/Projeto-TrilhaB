@@ -6,14 +6,14 @@ Regressao Logistica,C=1.0,0.6207,0.4451,0.6571,0.7598
 Decision Tree,max_depth=4,0.5527,0.4393,0.5461,0.6726
 Decision Tree,max_depth=6,0.5486,0.4064,0.5751,0.6644
 Decision Tree,max_depth=8,0.5215,0.3442,0.5718,0.6485
-Random Forest,"max_depth=8, min_samples_leaf=20",0.6432,0.5108,0.6845,0.7344
-Random Forest,"max_depth=12, min_samples_leaf=8",0.6389,0.5056,0.6685,0.7427
-Random Forest,"max_depth=16, min_samples_leaf=20",0.6417,0.5075,0.6744,0.7431
-HistGradientBoosting,"learning_rate=0.05, max_depth=3",0.6101,0.4581,0.6682,0.7042
-HistGradientBoosting,"learning_rate=0.05, max_depth=4",0.6083,0.4456,0.6648,0.7144
-HistGradientBoosting,"learning_rate=0.1, max_depth=3",0.5967,0.4645,0.6324,0.6933
-HistGradientBoosting,"learning_rate=0.1, max_depth=4",0.5924,0.4711,0.6104,0.6957
-XGBoost,"learning_rate=0.03, max_depth=3",0.6265,0.4992,0.6581,0.7223
-XGBoost,"learning_rate=0.03, max_depth=4",0.6304,0.5071,0.677,0.7071
-XGBoost,"learning_rate=0.05, max_depth=3",0.6252,0.5058,0.672,0.6978
-XGBoost,"learning_rate=0.05, max_depth=4",0.6206,0.4946,0.6894,0.6778
+Random Forest,"max_depth=8, min_samples_leaf=20",0.64,0.5055,0.6769,0.7376
+Random Forest,"max_depth=12, min_samples_leaf=8",0.6442,0.5087,0.6818,0.7421
+Random Forest,"max_depth=16, min_samples_leaf=20",0.6424,0.5136,0.6826,0.731
+HistGradientBoosting,"learning_rate=0.05, max_depth=3",0.6091,0.4644,0.6582,0.7047
+HistGradientBoosting,"learning_rate=0.05, max_depth=4",0.6148,0.4749,0.6532,0.7162
+HistGradientBoosting,"learning_rate=0.1, max_depth=3",0.589,0.4495,0.6175,0.6998
+HistGradientBoosting,"learning_rate=0.1, max_depth=4",0.5984,0.4722,0.6359,0.687
+XGBoost,"learning_rate=0.03, max_depth=3",0.6257,0.499,0.6556,0.7225
+XGBoost,"learning_rate=0.03, max_depth=4",0.629,0.4895,0.6806,0.7168
+XGBoost,"learning_rate=0.05, max_depth=3",0.6189,0.4905,0.6585,0.7078
+XGBoost,"learning_rate=0.05, max_depth=4",0.6205,0.4878,0.6725,0.7011

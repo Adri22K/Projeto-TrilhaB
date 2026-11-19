@@ -12,18 +12,18 @@ Como executar:
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 import sys
 import time
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 import coleta_integracao
 import prepara_sprint2
+import sprint3_baselines
 import sprint4_features
+import sprint5_modelos
 import modelos_arvore_random_forest
 
 
@@ -36,41 +36,27 @@ def executar_pipeline_completo(forcar_recoleta: bool = False) -> dict:
 
     # 1. ETAPA DE COLETA DE DADOS ABERTOS
     print("\n>>> ETAPA 1/4: Coleta e Integracao de Dados Abertos (Open-Meteo)")
-    raw_csv = ROOT / "data/raw/integrado.csv"
-    if raw_csv.is_file() and not forcar_recoleta:
-        print(f" -> Arquivo bruto existente detectado: {raw_csv}")
-        print(" -> Validando integridade e idempotencia dos dados...")
-    else:
-        print(" -> Requisitando APIs Open-Meteo Air Quality e Historical Weather...")
-        coleta_integracao.main(["--config", str(ROOT / "config/params.yaml")])
+    argumentos = ["--config", str(ROOT / "config/params.yaml")]
+    if forcar_recoleta:
+        argumentos.append("--overwrite")
+    coleta_integracao.main(argumentos)
 
-    # 2. ETAPA DE ANALISE, LIMPEZA E ENGENHARIA DE ATRIBUTOS
-    print("\n>>> ETAPA 2/4: Analise, Limpeza, Split Temporal e Engenharia de Atributos")
-    interim_csv = ROOT / "data/interim/integrado_limpo.csv"
-    s4_train_csv = ROOT / "data/processed/treino_features_s4.csv"
-    s4_test_csv = ROOT / "data/processed/teste_features_s4.csv"
-
-    if not interim_csv.is_file():
-        print(" -> Gerando dados limpos e split da Sprint 2...")
-        prepara_sprint2.main()
-    else:
-        print(f" -> Dados limpos em data/interim/ prontos: {interim_csv.name}")
-
-    if not (s4_train_csv.is_file() and s4_test_csv.is_file()):
-        print(" -> Gerando 25 atributos congelados da Sprint 4/5...")
-        sprint4_features.main()
-    else:
-        print(f" -> Matrizes de modelagem prontas: {s4_train_csv.name} e {s4_test_csv.name}")
+    # Cada execucao reconstrui as dependencias. Assim uma nova coleta nunca
+    # reutiliza matrizes antigas e o botao de retreino realmente roda S3/S4/S5.
+    print("\n>>> ETAPA 2/4: Limpeza, split e engenharia de atributos (S2, S3, S4)")
+    prepara_sprint2.main()
+    sprint3_baselines.main()
+    sprint4_features.main()
 
     # 3. ETAPA DE MODELAGEM: DECISION TREE, RANDOM FOREST E XGBOOST
-    print("\n>>> ETAPA 3/4: Treinamento e Validacao dos 3 Modelos de ML")
-    print(" -> Ajustando Decision Tree, Random Forest e XGBoost com Yeo-Johnson e validacao temporal...")
+    print("\n>>> ETAPA 3/4: Selecao oficial Sprint 5 e comparacao exploratoria")
+    sprint5_modelos.main()
+    print(" -> Reavaliando os tres algoritmos com calibracao temporal independente...")
     resumo_modelagem = modelos_arvore_random_forest.main()
 
     # 4. ETAPA DE COMPARACAO COM AS BASELINES
     print("\n>>> ETAPA 4/4: Consolidacao da Comparacao com as Baselines")
     comparativo = resumo_modelagem["comparativo"]
-    df_cmp = pd.DataFrame(comparativo)
 
     tempo_total = time.time() - inicio
     print("\n" + "=" * 80)
@@ -78,7 +64,7 @@ def executar_pipeline_completo(forcar_recoleta: bool = False) -> dict:
     print("=" * 80)
 
     # Resumo para exibicao rápida
-    print("\nRESUMO DO COMPARATIVO FINAL NO CONJUNTO DE TESTE (3.480h):")
+    print("\nRESUMO DO COMPARATIVO EXPLORATORIO NO CONJUNTO DE TESTE:")
     for r in comparativo:
         print(f" - {r['modelo']:<36} | Recall: {r['recall_c1']*100:5.2f}% | FN: {r['fn']:3d} | FP: {r['fp']:3d} | F2: {r['f2_c1']:.4f} | Status: {r['status_aprovacao']}")
 
@@ -95,7 +81,6 @@ def executar_pipeline_completo(forcar_recoleta: bool = False) -> dict:
 
 
 if __name__ == "__main__":
-    import pandas as pd
     parser = argparse.ArgumentParser(description="Executa o pipeline completo de ponta a ponta")
     parser.add_argument("--recoletar", action="store_true", help="Forca nova consulta as APIs Open-Meteo")
     args = parser.parse_args()

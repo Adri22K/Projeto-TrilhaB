@@ -153,3 +153,9 @@ A coleta ao vivo no Colab devolveu os mesmos dados do repositório (1.960 positi
 | Baselines (Dummy + persistência + Naive Bayes) com métricas interpretadas | 1,5 | Três baselines no mesmo split, métricas por classe, NB como baseline pedagógico explícito | | |
 | Scrum + diário de bordo | 1,0 | Board e diário refletindo o processo real da Sprint | | |
 | **Nota final da Sprint 3** | **4,0** | | **___ / 4,0** | |
+
+## Revisão de 18/11/2026
+
+Baseline Dummy (91,41% de acurácia, recall zero, 299 FN) não é aceitável para alertas. Persistência usa o estado da emissão. No retreino iniciado em 18/11, persistência reproduziu 154 FN; NB da S3, 180 FN. Não confundir com o NB após engenharia de atributos e limiar da Sprint 5.
+
+Consulte a [spec de revisão](../../specs-dash/revisao_integral_sprints_modelos_dashboard.md) e o [relatório de correções](../../specs-dash/RELATORIO_REVISAO_CORRECOES_2026-11-18.md).

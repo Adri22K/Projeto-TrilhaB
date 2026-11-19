@@ -187,3 +187,9 @@ Development Team = Adrielle, Victor, João Pedro e Samir
 | Sprint Review / incremento demonstrado | 0,5 | Incremento real apresentado ao PO, com feedback registrado | | |
 | Scrum + diário de bordo | 0,5 | Board atualizado semanalmente, diário reflexivo de todos os integrantes | | |
 | **Nota final da Sprint 4** | **4,0** | | **___ / 4,0** | |
+
+## Revisão de 18/11/2026
+
+X possui 25 atributos congelados; Z é a matriz transformada por imputação de mediana e Yeo-Johnson ajustados somente ao treino de cada janela. A seleção histórica usa F1 e a Sprint 5 usa F2. PM2,5 participa do alvo mas não de X; uma busca alternativa que inclua PM2,5 e otimize F2 exige teste prospectivo independente. Não alterar as features após consultar o teste.
+
+Consulte a [spec de revisão](../../specs-dash/revisao_integral_sprints_modelos_dashboard.md) e o [relatório de correções](../../specs-dash/RELATORIO_REVISAO_CORRECOES_2026-11-18.md).

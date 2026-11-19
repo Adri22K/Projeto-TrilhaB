@@ -1,0 +1,45 @@
+{
+  "gerado_em_utc": "2026-11-19T20:42:44.780498+00:00",
+  "origem": "validacao temporal OOF, 3 janelas, F2 (beta=2), sem otimizacao no teste",
+  "n_treino": 13992,
+  "n_teste": 3480,
+  "corte_teste": "2026-04-14 00:00:00",
+  "horizonte_horas": 24,
+  "features": [
+    "pm10",
+    "pm10_lag_1h",
+    "pm10_lag_24h",
+    "pm10_media_24h",
+    "sulphur_dioxide",
+    "sulphur_dioxide_lag_1h",
+    "sulphur_dioxide_lag_24h",
+    "sulphur_dioxide_media_24h",
+    "precipitation",
+    "precipitation_lag_1h",
+    "precipitation_lag_24h",
+    "precipitation_media_24h",
+    "wind_speed_10m",
+    "wind_speed_10m_lag_1h",
+    "wind_speed_10m_lag_24h",
+    "wind_speed_10m_media_24h",
+    "ozone_media_8h",
+    "ozone_max_8h",
+    "temperature_max_24h",
+    "temperature_max_24h_delta",
+    "hora_sin",
+    "hora_cos",
+    "mes_sin",
+    "mes_cos",
+    "elevacao_solar_alvo"
+  ],
+  "limiares_f2": {
+    "Decision Tree": 0.35,
+    "Random Forest": 0.3,
+    "XGBoost": 0.2
+  },
+  "f2_validacao": {
+    "Decision Tree": 0.7233414379993053,
+    "Random Forest": 0.737331081081081,
+    "XGBoost": 0.7277486910994765
+  }
+}
