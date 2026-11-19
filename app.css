@@ -8,7 +8,8 @@
 
 html, body, [class*="css"] { font-family: 'Segoe UI', Inter, Arial, sans-serif; }
 .stApp { background: #f5f8fa; }
-.block-container { max-width: 1340px; padding-top: 2rem; padding-bottom: 4rem; }
+/* Preserve the native Streamlit top inset for the header and sidebar toggle. */
+.block-container { max-width: 1340px; padding-bottom: 4rem; }
 h1, h2, h3, h4 { color: var(--air-ink); letter-spacing: -.025em; }
 p, li { line-height: 1.6; }
 div[data-testid="stSidebar"] { background: #fff; border-right: 1px solid var(--air-line); }
@@ -22,11 +23,11 @@ div[data-testid="stButton"] button[kind="primary"] { border: 0; background: #127
 div[data-testid="stButton"] button[kind="primary"]:hover { background: #105c53; }
 div[data-testid="stButton"] button { border-radius: 11px; }
 
-.hero-container { background: linear-gradient(120deg, #e4f4ee 0%, #eef7fb 100%); border: 1px solid #d9e9e6; padding: 28px 32px; border-radius: 22px; margin: 0 0 26px; }
+.hero-container { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; background: linear-gradient(120deg, #e4f4ee 0%, #eef7fb 100%); border: 1px solid #d9e9e6; padding: 28px 32px; border-radius: 22px; margin: 0 0 26px; }
 .hero-title { color: #163b41; font-weight: 800; font-size: clamp(1.5rem, 2.8vw, 2.5rem); line-height: 1.17; letter-spacing: -.045em; margin-bottom: 9px; overflow-wrap: anywhere; }
 .hero-subtitle { color: #436575; font-size: 1rem; line-height: 1.65; max-width: 920px; margin-bottom: 18px; overflow-wrap: anywhere; }
 .hero-badge-container { display: flex; gap: 8px; flex-wrap: wrap; }
-.hero-badge { display: inline-block; background: #fff; border: 1px solid #cfdfdc; color: #35645f; padding: 6px 11px; border-radius: 99px; font-weight: 600; font-size: .77rem; }
+.hero-badge { display: inline-block; box-sizing: border-box; min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; background: #fff; border: 1px solid #cfdfdc; color: #35645f; padding: 6px 11px; border-radius: 99px; font-weight: 600; font-size: .77rem; }
 .metric-card { background: white; border: 1px solid var(--air-line); border-radius: 17px; padding: 22px; box-shadow: 0 3px 14px rgba(29, 57, 59, .035); height: 100%; }
 .metric-card h4 { font-size: 1.04rem; }
 .highlight-card { background: #eaf5f1; color: #234f4b; border: 1px solid #d1e8de; padding: 19px 22px; border-radius: 15px; margin-bottom: 18px; line-height: 1.8; }
@@ -66,7 +67,7 @@ div[data-testid="stButton"] button { border-radius: 11px; }
 .air-forecast-note { font-size: .8rem; margin-top: 13px; color: #657e88; }
 
 @media (max-width: 840px) {
-  .block-container { padding: 1rem .85rem 3rem; }
+  .block-container { padding-inline: .85rem; padding-bottom: 3rem; }
   .hero-container { padding: 23px 20px; border-radius: 17px; }
   .air-today { grid-template-columns: 1fr; }
   .air-now, .air-outlook { padding: 22px; }
@@ -74,6 +75,11 @@ div[data-testid="stButton"] button { border-radius: 11px; }
   div[data-testid="stLatex"], .katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
 }
 @media (max-width: 450px) {
+  .hero-container { padding: 18px 14px; margin-bottom: 18px; }
+  .hero-title { font-size: clamp(1.25rem, 5.5vw, 1.5rem); line-height: 1.25; }
+  .hero-subtitle { font-size: .94rem; line-height: 1.55; margin-bottom: 14px; }
+  .hero-badge-container { gap: 6px; }
+  .hero-badge { padding: 5px 9px; }
   .air-current { align-items: flex-start; }
   .air-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .air-hour { padding: 13px 11px; min-height: 142px; }
