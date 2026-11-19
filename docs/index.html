@@ -38,8 +38,6 @@
       text-align: left;
     }
     #inicio .hero-note-text { min-width: 0; }
-    #inicio .hero-note-text h2 { margin-top: 0; }
-    #inicio .hero-note-text p { margin-bottom: 0; }
     #inicio .hero-note .hero-logo {
       display: block;
       grid-column: 2;
@@ -52,30 +50,38 @@
       margin: 0;
     }
     
-  #inicio .hero-note-text h2 {
-  margin-top: 0;
-  font-size: clamp(2rem, 3vw, 3.4rem);
-  line-height: 1.12;
-  margin-bottom: 18px;
-}
+    /* Texto do quadro "Previsão para se movimentar melhor" —
+       seletores reforçados + !important para vencer regras do assets/style.css */
+    #inicio.hero .hero-note .hero-note-text h2 {
+      margin: 0 0 18px !important;
+      font-size: clamp(2rem, 3vw, 3rem) !important;
+      line-height: 1.15 !important;
+    }
+    #inicio.hero .hero-note .hero-note-text p {
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: clamp(1.2rem, 1.6vw, 1.55rem) !important;
+      line-height: 1.65 !important;
+      max-width: 36ch !important;
+    }
 
-  #inicio .hero-note-text p {
-  margin-bottom: 0;
-  font-size: clamp(1.2rem, 1.7vw, 1.7rem);
-  line-height: 1.7;
-  max-width: 34ch;
-}
-    
-  @media (max-width: 700px) {
-  #inicio .hero-note-text h2 {
-  font-size: clamp(1.8rem, 7vw, 2.4rem);
-  }
-
-  #inicio .hero-note-text p {
-  font-size: clamp(1.05rem, 4.2vw, 1.25rem);
-  max-width: none;
-  }
-}
+    @media (max-width: 700px) {
+      #inicio .hero-note {
+        grid-template-columns: 1fr;
+      }
+      #inicio .hero-note .hero-logo {
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: center;
+      }
+      #inicio.hero .hero-note .hero-note-text h2 {
+        font-size: clamp(1.7rem, 7vw, 2.3rem) !important;
+      }
+      #inicio.hero .hero-note .hero-note-text p {
+        font-size: clamp(1.05rem, 4.2vw, 1.25rem) !important;
+        max-width: none !important;
+      }
+    }
   </style>
 </head>
 <body>
