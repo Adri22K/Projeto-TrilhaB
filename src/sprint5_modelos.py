@@ -22,6 +22,7 @@ from pathlib import Path
 import sys
 
 import joblib
+from threadpoolctl import threadpool_limits
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -34,7 +35,7 @@ from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, confusion_matrix, fbeta_score,
-                             precision_recall_fscore_support)
+                             precision_recall_fscore_support, roc_auc_score)
 from sklearn.model_selection import FixedThresholdClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
@@ -47,6 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 import sprint3_baselines as s3  # noqa: E402
 import sprint4_features as s4  # noqa: E402
+from limites_treinamento import TRAINING_WORKERS  # noqa: E402
 
 TRAIN_S4 = ROOT / "data/processed/treino_features_s4.csv"
 TEST_S4 = ROOT / "data/processed/teste_features_s4.csv"
@@ -57,9 +59,19 @@ REPORT_DIR = ROOT / "reports/sprint5"
 MODEL_DIR = ROOT / "models"
 
 ALVO, CUTOFF, HORIZON_H, SEED = s4.ALVO, s4.CUTOFF, s4.HORIZON_H, 42
-BETA = 2  # F2: recall pesa 2x a precisao, porque o FN e o erro mais caro (RFC)
+BETA = 2  # F2 privilegia recall (beta²=4 na formula); nao define custo real de FN/FP.
 GRADE_LIMIAR = np.round(np.arange(0.05, 0.951, 0.05), 2)
-TOLERANCIA_EMPATE = 0.005  # empate em F2 na validacao -> modelo mais simples
+REGRA_SELECAO = (
+    "maior recall da classe 1 na validacao temporal, com limiares max F2; "
+    "F2 >= persistencia; desempate por F2 e ordem de simplicidade"
+)
+
+
+def selecionar_modelo(validacao: dict[str, dict]) -> str:
+    """Prioriza horas inadequadas sem aceitar desempenho F2 inferior ao piso temporal."""
+    piso = validacao["Persistencia"]["f2_c1"]
+    elegiveis = [n for n, m in validacao.items() if m["f2_c1"] >= piso]
+    return max(elegiveis, key=lambda n: (validacao[n]["recall_c1"], validacao[n]["f2_c1"]))
 
 # Ordem = complexidade crescente (usada no desempate)
 CANDIDATOS = {
@@ -83,7 +95,7 @@ CANDIDATOS = {
         "grade": {
             f"max_depth={d}, min_samples_leaf={leaf}": RandomForestClassifier(
                 n_estimators=200, max_depth=d, min_samples_leaf=leaf, min_samples_split=10,
-                class_weight="balanced", random_state=SEED, n_jobs=-1)
+                class_weight="balanced", random_state=SEED, n_jobs=TRAINING_WORKERS)
             for d, leaf in ((8, 20), (12, 8), (16, 20))
         },
     },
@@ -98,7 +110,7 @@ CANDIDATOS = {
         "grade": {
             f"learning_rate={lr}, max_depth={d}": xgb.XGBClassifier(
                 n_estimators=200, learning_rate=lr, max_depth=d, scale_pos_weight=6.19,
-                subsample=0.8, colsample_bytree=0.8, random_state=SEED, eval_metric="logloss", n_jobs=-1)
+                subsample=0.8, colsample_bytree=0.8, random_state=SEED, eval_metric="logloss", n_jobs=TRAINING_WORKERS)
             for lr in (0.03, 0.05) for d in (3, 4)
         },
     },
@@ -124,20 +136,34 @@ def metricas(y, pred) -> dict:
             "tn": tn, "fp": fp, "fn": fn, "tp": tp}
 
 
-def oof(estimador, treino, features):
-    """Probabilidades fora da amostra nas 3 janelas de validacao (cada uma treinada so no passado)."""
-    ys, ps, aps = [], [], []
+def preparar_janelas_transformadas(treino: pd.DataFrame, features: list[str]):
+    """Pre-ajusta o ColumnTransformer (imputacao + Yeo-Johnson) uma vez por janela temporal."""
+    preparadas = []
     for _, fit, val in janelas(treino):
-        modelo = s4.make_pipeline(features, clone(estimador), "yeo_johnson").fit(fit[features], fit[ALVO])
-        prob = modelo.predict_proba(val[features])[:, 1]
-        ys.append(val[ALVO].to_numpy())
+        transformer = s4.make_transformer(features, "yeo_johnson")
+        X_fit = transformer.fit_transform(fit[features], fit[ALVO])
+        X_val = transformer.transform(val[features])
+        preparadas.append((X_fit, fit[ALVO].to_numpy(), X_val, val[ALVO].to_numpy()))
+    return preparadas
+
+
+def oof(estimador, treino, features, janelas_prep=None):
+    """Probabilidades fora da amostra nas 3 janelas de validacao (cada uma treinada so no passado)."""
+    if janelas_prep is None:
+        janelas_prep = preparar_janelas_transformadas(treino, features)
+    ys, ps, aps = [], [], []
+    for X_fit, y_fit, X_val, y_val in janelas_prep:
+        clf = clone(estimador).fit(X_fit, y_fit)
+        prob = clf.predict_proba(X_val)[:, 1]
+        ys.append(y_val)
         ps.append(prob)
-        aps.append(average_precision_score(val[ALVO], prob))
+        aps.append(average_precision_score(y_val, prob))
     oof.janelas = (ys, ps)
     return np.concatenate(ys), np.concatenate(ps), aps
 
 
 # --------------------------------------------------------------------------- principal
+@threadpool_limits.wrap(limits=TRAINING_WORKERS)
 def main() -> dict:
     config = yaml.safe_load(CONFIG_FILE.read_text(encoding="utf-8"))
     features = list(config["sprint4"]["features_congeladas"])
@@ -156,11 +182,12 @@ def main() -> dict:
         config)
 
     # 1) Busca de hiperparametros (AP medio nas 3 janelas; nao depende de limiar)
+    janelas_prep = preparar_janelas_transformadas(treino, features)
     busca, escolhidos = [], {}
     for nome, spec in CANDIDATOS.items():
         melhor = None
         for rotulo, est in spec["grade"].items():
-            y_val, p_val, aps = oof(est, treino, features)
+            y_val, p_val, aps = oof(est, treino, features, janelas_prep=janelas_prep)
             linha = {"modelo": nome, "hiperparametros": rotulo, "ap_medio": float(np.mean(aps)),
                      **{f"ap_janela_{i + 1}": float(a) for i, a in enumerate(aps)}}
             busca.append(linha)
@@ -215,17 +242,17 @@ def main() -> dict:
     fig.savefig(REPORT_DIR / "curva_limiar_validacao.png", dpi=150)
     plt.close(fig)
 
-    # 3) Regra de selecao (registrada antes do teste): maior F2 na validacao; empate -> mais simples.
+    # 3) Politica revisada: recall positivo nos limiares max F2, com piso da persistencia.
     # Dummy e persistencia entram como baselines fixos na mesma comparacao de validacao.
     ordem = list(CANDIDATOS)
-    ordem_selecao = ["Dummy", "Persistencia", *ordem]
-    f2_val = {
-        "Dummy": val_dummy["f2_c1"],
-        "Persistencia": val_persist["f2_c1"],
-        **{n: limiares[n]["val"]["f2_c1"] for n in ordem},
+    validacao = {
+        "Dummy": val_dummy,
+        "Persistencia": val_persist,
+        **{n: limiares[n]["val"] for n in ordem},
     }
-    topo = max(f2_val.values())
-    selecionado = next(n for n in ordem_selecao if f2_val[n] >= topo - TOLERANCIA_EMPATE)
+    f2_val = {n: m["f2_c1"] for n, m in validacao.items()}
+    recall_val = {n: m["recall_c1"] for n, m in validacao.items()}
+    selecionado = selecionar_modelo(validacao)
 
     # 4) Treino final no treino completo e teste UMA vez (limiar padrao e limiar congelado)
     X_tr, y_tr = treino[features], treino[ALVO].to_numpy()
@@ -236,6 +263,8 @@ def main() -> dict:
         m = metricas(y_te, pred)
         comparativo.append({"modelo": nome, "familia": familia, "hiperparametros": hp,
                             "limiar": limiar_txt, **{k: m[k] for k in m},
+                            "roc_auc": roc_auc_score(y_te, prob) if prob is not None else None,
+                            "average_precision": average_precision_score(y_te, prob) if prob is not None else None,
                             "recall_val": val_info["recall_c1"] if val_info else None,
                             "f2_val": val_info["f2_c1"] if val_info else None})
         p, r, f, s = precision_recall_fscore_support(y_te, pred, labels=[0, 1], zero_division=0)
@@ -247,10 +276,10 @@ def main() -> dict:
 
     dummy = s4.make_pipeline(features, DummyClassifier(strategy="most_frequent"), "yeo_johnson").fit(X_tr, y_tr)
     registrar("Dummy", "baseline S4", "most_frequent", "padrao (predict)", dummy.predict(X_te),
-              val_info=val_dummy)
+              prob=dummy.predict_proba(X_te)[:, 1], val_info=val_dummy)
     persist = s3.pipeline_persistencia().fit(treino[["estado_atual"]], y_tr)
     registrar("Persistencia", "baseline S4", "regra estado(t) -> t+24h", "—",
-              persist.predict(teste[["estado_atual"]]), val_info=val_persist)
+              persist.predict(teste[["estado_atual"]]), prob=persist.predict_proba(teste[["estado_atual"]])[:, 1], val_info=val_persist)
 
     finais = {}
     for nome in ordem:
@@ -260,9 +289,9 @@ def main() -> dict:
         t = limiares[nome]["limiar"]
         fam = CANDIDATOS[nome]["familia"]
         registrar(nome, fam, linha["hiperparametros"], "padrao (predict)", pipe.predict(X_te),
-                  val_info=limiares[nome]["val_padrao"])
+                  prob=prob, val_info=limiares[nome]["val_padrao"])
         registrar(nome, fam, linha["hiperparametros"], f"{t:.2f} (validação)", (prob >= t).astype(int),
-                  val_info=limiares[nome]["val"])
+                  prob=prob, val_info=limiares[nome]["val"])
         finais[nome] = (pipe, prob)
 
     comp = pd.DataFrame(comparativo)
@@ -311,7 +340,7 @@ def main() -> dict:
             raise ValueError("Artefato final nao reproduz as previsoes avaliadas")
         meta = {"modelo": selecionado, "hiperparametros": escolhidos[selecionado][0]["hiperparametros"],
                 "limiar": t_final, "origem_limiar": "max F2 na validacao temporal (3 janelas dentro do treino)",
-                "features": features, "normalizacao": "yeo_johnson", "random_state": None,
+                "features": features, "normalizacao": "yeo_johnson", "random_state": escolhidos[selecionado][1].get_params().get("random_state"),
                 "corte_split": str(CUTOFF), "sklearn": sklearn.__version__}
     elif selecionado == "Persistencia":
         final = persist
@@ -327,6 +356,7 @@ def main() -> dict:
         meta = {"modelo": selecionado, "hiperparametros": "most_frequent", "limiar": None,
                 "origem_limiar": None, "features": features, "normalizacao": "yeo_johnson",
                 "random_state": None, "corte_split": str(CUTOFF), "sklearn": sklearn.__version__}
+    meta["regra_selecao"] = REGRA_SELECAO
     joblib.dump(final, MODEL_DIR / "modelo_final_s5.joblib")
     (MODEL_DIR / "modelo_final_s5.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     # 7) Analise de erros do modelo final (episodios concretos)
@@ -366,7 +396,8 @@ def main() -> dict:
     ax.set_xticks(range(24))
     ax.set_xlabel("Hora prevista (local)")
     ax.set_ylabel("Horas")
-    ax.set_title(f"Erros do modelo final no teste por hora — {selecionado}, limiar {t_final:.2f}")
+    limiar_grafico = f"{t_final:.2f}" if t_final is not None else "fixo"
+    ax.set_title(f"Erros do modelo final no teste por hora — {selecionado}, limiar {limiar_grafico}")
     ax.legend()
     fig.tight_layout()
     fig.savefig(REPORT_DIR / "erros_modelo_final_por_hora.png", dpi=150)
@@ -391,7 +422,8 @@ def main() -> dict:
         "hiperparametros_escolhidos": {n: escolhidos[n][0]["hiperparametros"] for n in ordem},
         "limiares_validacao": {n: limiares[n]["limiar"] for n in ordem},
         "f2_validacao": f2_val, "dummy_validacao": val_dummy, "persistencia_validacao": val_persist,
-        "regra_selecao": "maior F2 na validacao temporal; empate <= 0.005 -> modelo mais simples",
+        "recall_validacao": recall_val,
+        "regra_selecao": REGRA_SELECAO,
         "selecionado_na_validacao": selecionado,
         "modelo_final": modelo_final, "limiar_final": t_final,
         "versoes": {"sklearn": sklearn.__version__, "pandas": pd.__version__, "numpy": np.__version__},
@@ -403,6 +435,7 @@ def main() -> dict:
     print(f"Treino {len(treino)} | teste {len(teste)} ({int(y_te.sum())} positivas) | {len(features)} features S4")
     print("Validacao (F2; baselines fixos e candidatos no limiar congelado):",
           {k: round(v, 3) for k, v in f2_val.items()})
+    print("Validacao (recall positivo):", {k: round(v, 3) for k, v in recall_val.items()})
     print(f"Dummy na validacao: F2 {val_dummy['f2_c1']:.3f}")
     print(f"Persistencia na validacao: F2 {val_persist['f2_c1']:.3f}")
     limiar_final_txt = f"{t_final:.2f}" if t_final is not None else "fixo"
