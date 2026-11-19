@@ -6,6 +6,62 @@
   <meta name="description" content="CADENC.IA é um projeto de inteligência artificial para prever períodos de qualidade do ar inadequada em São Paulo.">
   <title>CADENC.IA | O ritmo do ar</title>
   <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* CADENC.IA: conteúdo da abertura em duas colunas, com logo à direita */
+    #inicio.hero {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 24px;
+    }
+    #inicio .hero-copy,
+    #inicio .hero-note {
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      margin-left: 0;
+      margin-right: 0;
+      box-sizing: border-box;
+    }
+    #inicio .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    #inicio .hero-note {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 42%);
+      align-items: center;
+      gap: clamp(20px, 4vw, 55px);
+      padding: clamp(22px, 4vw, 42px);
+      text-align: left;
+    }
+    #inicio .hero-note-text { min-width: 0; }
+    #inicio .hero-note-text h2 { margin-top: 0; }
+    #inicio .hero-note-text p { margin-bottom: 0; }
+    #inicio .hero-note .hero-logo {
+      display: block;
+      grid-column: 2;
+      grid-row: 1;
+      width: 100%;
+      max-width: 380px;
+      height: auto;
+      object-fit: contain;
+      justify-self: end;
+      margin: 0;
+    }
+    @media (max-width: 700px) {
+      #inicio .hero-note { grid-template-columns: minmax(0, 1fr); }
+      #inicio .hero-note .hero-logo {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: center;
+        max-width: 310px;
+      }
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -37,12 +93,16 @@
           <a class="button button-primary" href="#resultados">Conhecer os resultados</a>
           <a class="button button-secondary" href="https://github.com/Adri22K/Projeto-TrilhaB" target="_blank" rel="noopener noreferrer">Explorar repositório</a>
           <a class="button button-secondary" href="https://projeto-cadencia.streamlit.app/" target="_blank" rel="noopener noreferrer"> Acessar dashboard </a>    
-          <a class="button button-secondary" href="https://act-frill-79350993.figma.site/" target="_blank" rel="noopener noreferrer"> Conheça o protótipo </a>   
+          <a class="button button-secondary" href="https://act-frill-79350993.figma.site/" target="_blank" rel="noopener noreferrer"> Conheça o protótipo </a>
+        </div>
       </div>
+      
       <aside class="hero-note">
+        <div class="hero-note-text">
+          <h2>Previsão para se movimentar melhor</h2>
+          <p>O CADENC.IA conecta previsão ambiental e movimento humano. Os resultados são experimentais e não substituem dados oficiais ou orientações de saúde.</p>
+        </div>
         <img class="hero-logo" src="assets/cadencia-logo-clara.png" alt="Logo CADENC.IA em fundo claro, com pessoa correndo, linhas de vento, sol laranja e referência visual ao MASP">
-        <h2>Previsão para se movimentar melhor</h2>
-        <p>O CADENC.IA conecta previsão ambiental e movimento humano. Os resultados são experimentais e não substituem dados oficiais ou orientações de saúde.</p>
       </aside>
     </section>
 
