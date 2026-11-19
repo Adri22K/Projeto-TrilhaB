@@ -187,6 +187,8 @@ O projeto busca prever a ocorrência de horários com **qualidade do ar inadequa
 
 ## Como reproduzir
 
+Use Python 3.12, também selecionado no Streamlit Community Cloud. As versões do `requirements.txt` foram fixadas para compatibilidade com os modelos já treinados. Em Linux e Windows compatíveis, a instalação usa o XGBoost para CPU; em Debian/Ubuntu, `packages.txt` declara a biblioteca OpenMP necessária.
+
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
